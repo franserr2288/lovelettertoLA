@@ -1,0 +1,17 @@
+*.env
+__pycache__/
+.pytest_cache/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+env/
+.venv/
+ENV/
+.Python
+*.env
+.env.*
+!.env.example
+secrets/
+config.json
+credentials.json
