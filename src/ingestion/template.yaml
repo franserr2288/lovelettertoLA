@@ -6,6 +6,7 @@ Resources:
   MyScheduledFunction:
     Type: AWS::Serverless::Function
     Properties:
+      PackageType: Image
       Handler: ingest_city311.handler
       Runtime: python3.12
       CodeUri: ./city311
@@ -16,6 +17,10 @@ Resources:
           BASE_URL: "https://data.lacity.org"
           DATASET_RESOURCE_ID: "h73f-gn57" # make this a parameter they pass in so we can ingest w/e we want
           YEAR: 2025
+    Metadata:
+      DockerTag: python3.12-v1
+      DockerContext: city311/
+      Dockerfile: Dockerfile
 
       Events:
         Timer:
