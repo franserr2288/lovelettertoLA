@@ -1,0 +1,26 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: A simple scheduled Lambda function
+
+Resources:
+  MyScheduledFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: ingest_city311.handler
+      Runtime: python3.9
+      CodeUri: ./city311
+      MemorySize: 128
+      Timeout: 30
+      Environment:
+        Variables:
+          BASE_URL: "https://data.lacity.org"
+          DATASET_RESOURCE_ID: "h73f-gn57" # make this a parameter they pass in so we can ingest w/e we want
+          YEAR: 2025
+
+      Events:
+        Timer:
+          Type: ScheduleV2
+          Properties:
+            ScheduleExpression: cron(0 12 * * ? *) # daily at 12pm UTC
+            # Input: '{"BASE_URL":, , }'
+      
