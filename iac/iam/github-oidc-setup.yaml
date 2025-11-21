@@ -70,6 +70,7 @@ Resources:
             Resource:
               - 'arn:aws:iam::*:role/*-LambdaExecutionRole-*'
               - 'arn:aws:iam::*:role/*-FunctionRole-*'
+              - 'arn:aws:iam::*:role/*FunctionRole*'
               - 'arn:aws:iam::*:role/*LambdaRole*'
           
           - Sid: IAMPolicyManagement
@@ -208,7 +209,10 @@ Resources:
               StringEquals:
                 'token.actions.githubusercontent.com:aud': 'sts.amazonaws.com'
               StringLike:
-                'token.actions.githubusercontent.com:sub': !Sub 'repo:${GitHubOrg}/${GitHubRepo}:ref:refs/heads/main'
+                'token.actions.githubusercontent.com:sub': 
+                  - !Sub 'repo:${GitHubOrg}/${GitHubRepo}:ref:refs/heads/main'
+                  - !Sub 'repo:${GitHubOrg}/${GitHubRepo}:environment:dev'
+
       ManagedPolicyArns:
         - !Ref GitHubActionsSAMPolicy
 
