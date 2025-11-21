@@ -1,0 +1,13 @@
+version = 0.1
+
+[default.deploy.parameters]
+stack_name = "ingestion"
+resolve_s3 = true
+s3_prefix = "ingestion"
+region = "us-east-1"
+profile = "local-dev"
+capabilities = "CAPABILITY_IAM"
+image_repositories = []
+
+[default.global.parameters]
+region = "us-east-1"
