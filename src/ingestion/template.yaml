@@ -7,8 +7,8 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       PackageType: Image
-      Handler: ingest_city311.handler
-      Runtime: python3.12
+      # Handler: ingest_city311.handler
+      # Runtime: python3.12
       CodeUri: ./city311
       MemorySize: 1024
       Timeout: 30
