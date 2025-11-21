@@ -189,7 +189,7 @@ Resources:
           - Sid: STSAccess
             Effect: Allow
             Action:
-              - 'sts:GetCallerIdentity'
+              - 'sts:*'
             Resource: '*'
 
   GitHubActionsRole:
