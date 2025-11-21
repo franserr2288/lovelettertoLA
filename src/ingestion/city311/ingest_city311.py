@@ -7,7 +7,6 @@ import pandas as pd
 
 
 def handler(event, context):
-    return 
     url = construct_url_for_full_dataset_json()
     headers = {
         'Content-Type': 'application/json',
