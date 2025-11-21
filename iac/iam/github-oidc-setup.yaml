@@ -1,0 +1,224 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: GitHub Actions OIDC Setup for SAM Deployments
+
+Parameters:
+  GitHubOrg:
+    Type: String
+    Description: GitHub username
+    Default: franserr2288
+  
+  GitHubRepo:
+    Type: String
+    Description: GitHub repository name
+    Default: lovelettertoLA
+
+Resources:
+  GitHubActionsSAMPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      ManagedPolicyName: GitHubActionsSAMDeployPolicy
+      Description: Policy for GitHub Actions to deploy SAM applications
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: FullS3Access
+            Effect: Allow
+            Action: 's3:*'
+            Resource: '*'
+          
+          - Sid: FullLambdaAccess
+            Effect: Allow
+            Action: 'lambda:*'
+            Resource: '*'
+          
+          - Sid: CloudFormationAccess
+            Effect: Allow
+            Action:
+              - 'cloudformation:CreateStack'
+              - 'cloudformation:UpdateStack'
+              - 'cloudformation:DeleteStack'
+              - 'cloudformation:DescribeStacks'
+              - 'cloudformation:DescribeStackEvents'
+              - 'cloudformation:DescribeStackResources'
+              - 'cloudformation:GetTemplate'
+              - 'cloudformation:ValidateTemplate'
+              - 'cloudformation:CreateChangeSet'
+              - 'cloudformation:DescribeChangeSet'
+              - 'cloudformation:ExecuteChangeSet'
+              - 'cloudformation:DeleteChangeSet'
+              - 'cloudformation:ListStacks'
+              - 'cloudformation:GetTemplateSummary'
+            Resource: '*'
+          
+          - Sid: IAMRoleManagement
+            Effect: Allow
+            Action:
+              - 'iam:CreateRole'
+              - 'iam:DeleteRole'
+              - 'iam:GetRole'
+              - 'iam:PassRole'
+              - 'iam:AttachRolePolicy'
+              - 'iam:DetachRolePolicy'
+              - 'iam:PutRolePolicy'
+              - 'iam:DeleteRolePolicy'
+              - 'iam:GetRolePolicy'
+              - 'iam:ListRolePolicies'
+              - 'iam:ListAttachedRolePolicies'
+              - 'iam:UpdateAssumeRolePolicy'
+              - 'iam:TagRole'
+              - 'iam:UntagRole'
+            Resource:
+              - 'arn:aws:iam::*:role/*-LambdaExecutionRole-*'
+              - 'arn:aws:iam::*:role/*-FunctionRole-*'
+              - 'arn:aws:iam::*:role/*LambdaRole*'
+          
+          - Sid: IAMPolicyManagement
+            Effect: Allow
+            Action:
+              - 'iam:CreatePolicy'
+              - 'iam:DeletePolicy'
+              - 'iam:GetPolicy'
+              - 'iam:GetPolicyVersion'
+              - 'iam:ListPolicyVersions'
+            Resource: 'arn:aws:iam::*:policy/*'
+          
+          - Sid: LogsAccess
+            Effect: Allow
+            Action:
+              - 'logs:CreateLogGroup'
+              - 'logs:DeleteLogGroup'
+              - 'logs:DescribeLogGroups'
+              - 'logs:PutRetentionPolicy'
+              - 'logs:TagLogGroup'
+              - 'logs:UntagLogGroup'
+            Resource: '*'
+          
+          - Sid: APIGatewayAccess
+            Effect: Allow
+            Action:
+              - 'apigateway:GET'
+              - 'apigateway:POST'
+              - 'apigateway:PUT'
+              - 'apigateway:PATCH'
+              - 'apigateway:DELETE'
+            Resource: '*'
+          
+          - Sid: EventBridgeAccess
+            Effect: Allow
+            Action:
+              - 'events:PutRule'
+              - 'events:DeleteRule'
+              - 'events:DescribeRule'
+              - 'events:PutTargets'
+              - 'events:RemoveTargets'
+              - 'events:ListTargetsByRule'
+              - 'events:TagResource'
+              - 'events:UntagResource'
+            Resource: '*'
+          
+          - Sid: SQSAccess
+            Effect: Allow
+            Action:
+              - 'sqs:CreateQueue'
+              - 'sqs:DeleteQueue'
+              - 'sqs:GetQueueAttributes'
+              - 'sqs:SetQueueAttributes'
+              - 'sqs:TagQueue'
+              - 'sqs:UntagQueue'
+              - 'sqs:ListQueues'
+            Resource: '*'
+          
+          - Sid: SNSAccess
+            Effect: Allow
+            Action:
+              - 'sns:CreateTopic'
+              - 'sns:DeleteTopic'
+              - 'sns:GetTopicAttributes'
+              - 'sns:SetTopicAttributes'
+              - 'sns:Subscribe'
+              - 'sns:Unsubscribe'
+              - 'sns:TagResource'
+              - 'sns:UntagResource'
+            Resource: '*'
+          
+          - Sid: DynamoDBAccess
+            Effect: Allow
+            Action:
+              - 'dynamodb:CreateTable'
+              - 'dynamodb:UpdateTable'
+              - 'dynamodb:DeleteTable'
+              - 'dynamodb:DescribeTable'
+              - 'dynamodb:DescribeTimeToLive'
+              - 'dynamodb:UpdateTimeToLive'
+              - 'dynamodb:TagResource'
+              - 'dynamodb:UntagResource'
+              - 'dynamodb:ListTagsOfResource'
+            Resource: '*'
+          
+          - Sid: ECRAccess
+            Effect: Allow
+            Action:
+              - 'ecr:GetAuthorizationToken'
+              - 'ecr:BatchCheckLayerAvailability'
+              - 'ecr:GetDownloadUrlForLayer'
+              - 'ecr:BatchGetImage'
+              - 'ecr:PutImage'
+              - 'ecr:InitiateLayerUpload'
+              - 'ecr:UploadLayerPart'
+              - 'ecr:CompleteLayerUpload'
+              - 'ecr:CreateRepository'
+              - 'ecr:DeleteRepository'
+              - 'ecr:DescribeRepositories'
+            Resource: '*'
+          
+          - Sid: SecretsManagerReadAccess
+            Effect: Allow
+            Action:
+              - 'secretsmanager:GetSecretValue'
+              - 'secretsmanager:DescribeSecret'
+            Resource: '*'
+          
+          - Sid: SSMParameterReadAccess
+            Effect: Allow
+            Action:
+              - 'ssm:GetParameter'
+              - 'ssm:GetParameters'
+              - 'ssm:GetParametersByPath'
+            Resource: '*'
+          
+          - Sid: STSAccess
+            Effect: Allow
+            Action:
+              - 'sts:GetCallerIdentity'
+            Resource: '*'
+
+  GitHubActionsRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: GitHubActionsSAMDeployRole
+      Description: Role for GitHub Actions to deploy SAM applications
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Federated: !Sub 'arn:aws:iam::${AWS::AccountId}:oidc-provider/token.actions.githubusercontent.com'
+            Action: 'sts:AssumeRoleWithWebIdentity'
+            Condition:
+              StringEquals:
+                'token.actions.githubusercontent.com:aud': 'sts.amazonaws.com'
+              StringLike:
+                'token.actions.githubusercontent.com:sub': !Sub 'repo:${GitHubOrg}/${GitHubRepo}:*'
+      ManagedPolicyArns:
+        - !Ref GitHubActionsSAMPolicy
+
+Outputs:
+  RoleArn:
+    Description: ARN of the GitHub Actions role
+    Value: !GetAtt GitHubActionsRole.Arn
+    Export:
+      Name: GitHubActionsRoleArn
+  
+  PolicyArn:
+    Description: ARN of the SAM deployment policy
+    Value: !Ref GitHubActionsSAMPolicy
