@@ -3,30 +3,78 @@ Transform: AWS::Serverless-2016-10-31
 Description: A simple scheduled Lambda function
 
 Resources:
-  MyScheduledFunction:
+  City311IngestionQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: MyStandardQueue
+      VisibilityTimeout: 60
+
+  City311IngestionQueueDLQ:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: MyStandardQueue-DLQ
+
+  Ingestion:
     Type: AWS::Serverless::Function
     Properties:
       PackageType: Image
-      # Handler: ingest_city311.handler
-      # Runtime: python3.12
       CodeUri: ./city311
       MemorySize: 1024
       Timeout: 30
       Environment:
         Variables:
           BASE_URL: "https://data.lacity.org"
-          DATASET_RESOURCE_ID: "h73f-gn57" # make this a parameter they pass in so we can ingest w/e we want
-          YEAR: 2025
+          SOCRATA_TOKEN_PARAM_NAME: /ingestion/SOCRATA_APP_TOKEN
+
+      Policies:
+        - SSMParameterReadPolicy:
+            ParameterName: /ingestion/SOCRATA_APP_TOKEN
+
       Events:
-        Timer:
-          Type: ScheduleV2
+        SQSQueueEvent:
+          Type: SQS
           Properties:
-            ScheduleExpression: cron(0 12 * * ? *) # daily at 12pm UTC
-            # Input: '{"BASE_URL":, , }'
+            Queue: !GetAtt City311IngestionQueue.Arn
+            BatchSize: 1
+            RedrivePolicy:
+              deadLetterTargetArn: !GetAtt City311IngestionQueueDLQ.Arn
+              maxReceiveCount: 2
       
     Metadata:
       DockerTag: python3.12-v1
       DockerContext: city311/
       Dockerfile: Dockerfile
+
+  DatasetIngestionOrchestrator:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: orchestrator.handler
+      CodeUri: ./orchestrator
+      Runtime: python3.12
+      MemorySize: 128
+
+      Events:
+        Timer:
+          Type: ScheduleV2
+          Properties:
+            ScheduleExpression: cron(0 12 * * ? *) # daily at 12pm UTC
+            Input: !Sub '{"DATASET": "CITY311", "QUEUE_NAME":"${City311IngestionQueue.QueueName}", "DATASET_RESOURCE_ID":"h73f-gn57", "FORMAT": "CSV"}'
+            Policies: 
+              - SQSSendMessagePolicy:
+                  QueueName: !GetAtt City311IngestionQueue.QueueName
+        Timer:
+          Type: ScheduleV2
+          Properties:
+            ScheduleExpression: cron(0 12 * * ? *) # daily at 12pm UTC
+            Input: !Sub '{"DATASET": "CITY311", "QUEUE_NAME":"${City311IngestionQueue.QueueName}", "DATASET_RESOURCE_ID":"h73f-gn57", "FORMAT": "PARQUET"}'
+            Policies: 
+              - SQSSendMessagePolicy:
+                  QueueName: !GetAtt City311IngestionQueue.QueueName
+              
+
+
+
+  
+    
 
       
