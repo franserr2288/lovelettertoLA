@@ -31,6 +31,8 @@ Resources:
             Action: 'lambda:*'
             Resource: '*'
           
+
+          
           - Sid: CloudFormationAccess
             Effect: Allow
             Action:
@@ -70,7 +72,7 @@ Resources:
             Resource:
               - 'arn:aws:iam::*:role/*-LambdaExecutionRole-*'
               - 'arn:aws:iam::*:role/*-FunctionRole-*'
-              - 'arn:aws:iam::*:role/*FunctionRole*'
+              - 'arn:aws:iam::*:role/*Function*Role*'
               - 'arn:aws:iam::*:role/*LambdaRole*'
           
           - Sid: IAMPolicyManagement
@@ -115,6 +117,23 @@ Resources:
               - 'events:ListTargetsByRule'
               - 'events:TagResource'
               - 'events:UntagResource'
+            Resource: '*'
+          
+          - Sid: EventBridgeSchedulerAccess
+            Effect: Allow
+            Action:
+              - 'scheduler:CreateSchedule'
+              - 'scheduler:GetSchedule'
+              - 'scheduler:UpdateSchedule'
+              - 'scheduler:DeleteSchedule'
+              - 'scheduler:ListSchedules'
+              - 'scheduler:CreateScheduleGroup'
+              - 'scheduler:GetScheduleGroup'
+              - 'scheduler:DeleteScheduleGroup'
+              - 'scheduler:ListScheduleGroups'
+              - 'scheduler:TagResource'
+              - 'scheduler:UntagResource'
+              - 'scheduler:ListTagsForResource'
             Resource: '*'
           
           - Sid: SQSAccess
