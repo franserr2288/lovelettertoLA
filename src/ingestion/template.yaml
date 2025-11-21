@@ -17,15 +17,16 @@ Resources:
           BASE_URL: "https://data.lacity.org"
           DATASET_RESOURCE_ID: "h73f-gn57" # make this a parameter they pass in so we can ingest w/e we want
           YEAR: 2025
-    Metadata:
-      DockerTag: python3.12-v1
-      DockerContext: city311/
-      Dockerfile: Dockerfile
-
       Events:
         Timer:
           Type: ScheduleV2
           Properties:
             ScheduleExpression: cron(0 12 * * ? *) # daily at 12pm UTC
             # Input: '{"BASE_URL":, , }'
+      
+    Metadata:
+      DockerTag: python3.12-v1
+      DockerContext: city311/
+      Dockerfile: Dockerfile
+
       
