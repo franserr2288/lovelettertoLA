@@ -52,6 +52,9 @@ Resources:
       CodeUri: ./orchestrator
       Runtime: python3.12
       MemorySize: 128
+      Policies: 
+        - SQSSendMessagePolicy:
+          QueueName: !GetAtt City311IngestionQueue.QueueName
 
       Events:
         Timer:
@@ -59,17 +62,12 @@ Resources:
           Properties:
             ScheduleExpression: cron(0 12 * * ? *) # daily at 12pm UTC
             Input: !Sub '{"DATASET": "CITY311", "QUEUE_NAME":"${City311IngestionQueue.QueueName}", "DATASET_RESOURCE_ID":"h73f-gn57", "FORMAT": "CSV"}'
-            Policies: 
-              - SQSSendMessagePolicy:
-                  QueueName: !GetAtt City311IngestionQueue.QueueName
         Timer:
           Type: ScheduleV2
           Properties:
             ScheduleExpression: cron(0 12 * * ? *) # daily at 12pm UTC
             Input: !Sub '{"DATASET": "CITY311", "QUEUE_NAME":"${City311IngestionQueue.QueueName}", "DATASET_RESOURCE_ID":"h73f-gn57", "FORMAT": "PARQUET"}'
-            Policies: 
-              - SQSSendMessagePolicy:
-                  QueueName: !GetAtt City311IngestionQueue.QueueName
+            
               
 
 
