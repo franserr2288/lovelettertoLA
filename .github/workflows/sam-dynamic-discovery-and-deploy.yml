@@ -1,4 +1,4 @@
-name: SAM Validate, Build, Test, Deploy
+name: SAM Build and Deploy
 on:
   push:
     branches: [ main ]
