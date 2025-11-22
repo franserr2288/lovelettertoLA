@@ -9,34 +9,46 @@ permissions:
   contents: read 
 
 jobs:
+  # discover:
+  #   runs-on: ubuntu-latest
+  #   outputs:
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #     - id: find-templates
+  #       run: |
+  #         # Find all template.yaml files and extract their directories
+  #         TEMPLATES=$(find . -name 'template.yaml' -o -name 'template.yml' | \
+  #           jq -R -s -c 'split("\n")[:-1] | map(select(length > 0))')
+  #         echo "templates=$TEMPLATES" >> $GITHUB_OUTPUT
   discover:
     runs-on: ubuntu-latest
     outputs:
-      templates: ${{ steps.find-templates.outputs.templates }}
+      matrix: ${{ steps.build-matrix.outputs.matrix }}
     steps:
       - uses: actions/checkout@v3
-      - id: find-templates
+      - id: build-matrix
         run: |
-          # Find all template.yaml files and extract their directories
-          TEMPLATES=$(find . -name 'template.yaml' -o -name 'template.yml' | \
-            jq -R -s -c 'split("\n")[:-1] | map(select(length > 0))')
-          echo "templates=$TEMPLATES" >> $GITHUB_OUTPUT
+          MATRIX=$(find . -name 'template.yaml' -o -name 'template.yml' | while read template; do
+            dir=$(dirname "$template")
+            # Check .aws subdirectory first, then parent directory
+            if [ -f "$dir/.aws/regions.json" ]; then
+              regions=$(jq -c '.regions' "$dir/.aws/regions.json")
+            elif [ -f "$dir/regions.json" ]; then
+              regions=$(jq -c '.regions' "$dir/regions.json")
+            else
+              regions='["us-east-1"]'
+            fi
+            echo "$regions" | jq -c --arg tmpl "$template" '.[] | {template: $tmpl, region: .}'
+          done | jq -s -c '{include: .}')
+          echo "matrix=$MATRIX" >> $GITHUB_OUTPUT
+
+          
   deploy:
     needs: discover
     strategy:
-      matrix:
-        # Virginia, Oregon, Frankfurt, London, Singapore, Sydney
-        # region: [us-east-1, us-west-2 ,ap-southeast-1, ap-southeast-2, eu-central-1]
-        region: [us-east-1]
-        template: ${{ fromJson(needs.discover.outputs.templates) }}
-
-
+      matrix: ${{ fromJson(needs.discover.outputs.matrix) }}
     runs-on: ubuntu-latest
-    # param it later
     environment: dev
-
-    outputs:
-      env-name: ${{ steps.env-name.outputs.environment }}
     steps:
       - uses: actions/checkout@v2
 
@@ -52,22 +64,20 @@ jobs:
           role-to-assume: ${{ secrets.AWS_GITHUB_ACTIONS_ROLE_ARN }}
           aws-region: ${{ matrix.region }}
 
-      - name: Configure variables
-        shell: bash
-        id: vars
-        env:
-          REPO: ${{ github.repository }}
-          HASH: ${{ github.sha }}
-          REF: ${{ github.ref }}
-        run: |
-          # Set variables
-          BRANCH=${REF#refs/heads/}
-          REPOSITORY=`echo $REPO | tr "/" "-"`
-          ENVIRONMENT=$BRANCH-$REPOSITORY-${{ matrix.region }}
       - uses: aws-actions/setup-sam@v2
+      
+      - name: Get AWS Account ID
+        id: account
+        run: |
+          ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+          echo "::add-mask::$ACCOUNT_ID"
+          echo "account_id=$ACCOUNT_ID" >> $GITHUB_OUTPUT
 
       - run: |
           TEMPLATE_DIR=$(dirname ${{ matrix.template }})
           cd $TEMPLATE_DIR
           sam build
-          sam deploy --config-file samconfig.toml --no-fail-on-empty-changeset sam deploy --resolve-image-repos
+          sam deploy \
+            --config-file .aws/samconfig.toml \
+            --no-fail-on-empty-changeset \
+            --image-repository ${{ steps.account.outputs.account_id }}.dkr.ecr.${{ matrix.region }}.amazonaws.com/${{ secrets.ECR_REPO_NAME }}
