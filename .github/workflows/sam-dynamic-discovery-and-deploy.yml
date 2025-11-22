@@ -77,5 +77,5 @@ jobs:
           sam build
           sam deploy \
             --config-file .aws/samconfig.toml \
-            --no-fail-on-empty-changeset \
-            --image-repository ${{ steps.account.outputs.account_id }}.dkr.ecr.${{ matrix.region }}.amazonaws.com/${{ secrets.ECR_REPO_NAME }}
+            --image-repository ${{ steps.account.outputs.account_id }}.dkr.ecr.${{ matrix.region }}.amazonaws.com/${{ secrets.ECR_REPO_NAME }} \
+            --no-fail-on-empty-changeset
