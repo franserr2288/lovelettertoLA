@@ -14,6 +14,13 @@ Resources:
               - sts:AssumeRole
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+  StoreRoleArn:
+  Type: AWS::SSM::Parameter
+  Properties:
+    Name: /ingestion/lambda-role
+    Type: String
+    Value: !GetAtt IngestionLambdaRole.Arn
+
 
 Outputs:
   IngestionLambdaRoleArn:
@@ -22,9 +29,3 @@ Outputs:
       Name: ingestion-lambda-role-arn
   
 
-StoreRoleArn:
-  Type: AWS::SSM::Parameter
-  Properties:
-    Name: /ingestion/lambda-role
-    Type: String
-    Value: !GetAtt IngestionLambdaRole.Arn
