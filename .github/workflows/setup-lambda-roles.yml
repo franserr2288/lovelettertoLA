@@ -1,4 +1,4 @@
-name: Set Up ECR Repo
+name: Create Lambda Roles for App Components
 on:
   push:
     branches: [ main ]

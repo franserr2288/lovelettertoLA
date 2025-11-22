@@ -1,4 +1,4 @@
-name: Set Up ECR Repo
+name: Set Up Storage
 on:
   push:
     branches: [ main ]
