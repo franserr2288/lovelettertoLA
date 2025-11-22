@@ -49,5 +49,5 @@ jobs:
             --stack-name ecr-repo \
             --template-file file://ecr.yaml \
             --capabilities CAPABILITY_NAMED_IAM \
-            --profile local-dev \
+            --no-fail-on-empty-changeset \
             --region ${{matrix.region}}
