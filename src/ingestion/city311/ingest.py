@@ -5,6 +5,7 @@ import pandas as pd
 
 
 def handler(event, context):
+    # batch size 1
     body = json.loads(event["Records"][0]["body"])
     dataset_name = body["DATASET_NAME"]
     dataset_resource_id = body["DATASET_RESOURCE_ID"]
