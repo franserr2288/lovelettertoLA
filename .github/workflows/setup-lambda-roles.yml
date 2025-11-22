@@ -50,3 +50,4 @@ jobs:
             --image-repository ${{ steps.account.outputs.account_id }}.dkr.ecr.${{ matrix.region }}.amazonaws.com/${{ secrets.ECR_REPO_NAME }}
             --no-fail-on-empty-changeset \ 
             --template-file roles.yaml 
+            --region ${{matrix.region}}
