@@ -3,7 +3,7 @@ on:
   push:
     branches: [ main ]
     paths:
-        - "iac/container_registry/**"
+        - "iac/iam/lambda-roles/**"
   workflow_dispatch:
 
 permissions:
@@ -42,9 +42,9 @@ jobs:
           echo "account_id=$ACCOUNT_ID" >> $GITHUB_OUTPUT
 
       - run: |
-          aws cloudformation deploy \
-            --stack-name ecr-repo \
-            --template-file file://iac/container_registry/ecr.yaml \
-            --capabilities CAPABILITY_NAMED_IAM \
-            --profile local-dev \
-            --region us-east-1
+          sam build
+          sam deploy \
+            --config-file samconfig.toml \
+            --image-repository ${{ steps.account.outputs.account_id }}.dkr.ecr.${{ matrix.region }}.amazonaws.com/${{ secrets.ECR_REPO_NAME }}
+            --no-fail-on-empty-changeset \ 
+            --template-file roles.yaml
