@@ -16,6 +16,14 @@ Resources:
       RedrivePolicy:
         deadLetterTargetArn: !GetAtt City311IngestionQueueDLQ.Arn
         maxReceiveCount: 2
+  
+  City311IngestionQueueUrlParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: /ingestion/queue_url
+      Type: String
+      Value: !Ref City311IngestionQueue
+      Description: URL for the processing queue
 
   Ingestion:
     Type: AWS::Serverless::Function
@@ -24,6 +32,7 @@ Resources:
       CodeUri: ./city311
       MemorySize: 1024
       Timeout: 30
+      Role: "{{resolve:ssm:/ingestion/lambda-role}}"
       Environment:
         Variables:
           BASE_URL: "https://data.lacity.org"
@@ -31,6 +40,20 @@ Resources:
       Policies:
         - SSMParameterReadPolicy:
             ParameterName: /ingestion/SOCRATA_APP_TOKEN
+        - Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+              - s3:GetObject
+              - s3:PutObject
+              - s3:DeleteObject
+            Resource:
+              - !Sub 'arn:aws:s3:::{{resolve:ssm:/shared/data-bucket-name}}/*'
+          - Effect: Allow
+            Action:
+              - s3:ListBucket
+            Resource:
+              - !Sub 'arn:aws:s3:::{{resolve:ssm:/shared/data-bucket-name}}'
       Events:
         SQSQueueEvent:
           Type: SQS
@@ -48,18 +71,18 @@ Resources:
       Handler: orchestrator.handler
       CodeUri: ./orchestrator
       Runtime: python3.12
+      Role: "{{resolve:ssm:/ingestion/lambda-role}}"
       MemorySize: 128
       Policies: 
         - SQSSendMessagePolicy:
-            QueueUrl: !Ref City311IngestionQueue
             QueueName: !GetAtt City311IngestionQueue.QueueName
       Events:
-        Timer:
+        TimerCSV:
           Type: ScheduleV2
           Properties:
             ScheduleExpression: cron(0 12 * * ? *) # daily at 12pm UTC
             Input: !Sub '{"DATASET": "CITY311", "QUEUE_NAME":"${City311IngestionQueue.QueueName}", "DATASET_RESOURCE_ID":"h73f-gn57", "FORMAT": "CSV"}'
-        Timer:
+        TimerParquet:
           Type: ScheduleV2
           Properties:
             ScheduleExpression: cron(0 12 * * ? *) # daily at 12pm UTC

@@ -1,0 +1,30 @@
+Resources:
+  IngestionLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: IngestionLambdaRole
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+
+Outputs:
+  IngestionLambdaRoleArn:
+    Value: !GetAtt IngestionLambdaRole.Arn
+    Export:
+      Name: ingestion-lambda-role-arn
+  
+
+StoreRoleArn:
+  Type: AWS::SSM::Parameter
+  Properties:
+    Name: /ingestion/lambda-role
+    Type: String
+    Value: !GetAtt IngestionLambdaRole.Arn

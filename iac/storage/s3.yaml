@@ -1,0 +1,51 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: S3 Bucket Creation
+
+Resources:
+  FsOpenDataProject:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: fs-open-data-project
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+            BucketKeyEnabled: true
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      OwnershipControls:
+        Rules:
+          - ObjectOwnership: BucketOwnerEnforced
+      VersioningConfiguration:
+        Status: Enabled
+  
+  BucketNameParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: /shared/data-bucket-name
+      Type: String
+      Value: !Ref MyBucket
+      Description: Name of the application S3 bucket
+
+  FsOpenDataProjectBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref FsOpenDataProject
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: DenyInsecureTransport
+            Effect: Deny
+            Principal: '*'
+            Action: 's3:*'
+            Resource:
+              - !GetAtt FsOpenDataProject.Arn
+              - !Sub '${FsOpenDataProject.Arn}/*'
+            Condition:
+              Bool:
+                'aws:SecureTransport': 'false'
+  
