@@ -18,7 +18,7 @@ Resources:
               - sts:AssumeRole
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
-  StoreRoleArn:
+        - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly
     Type: AWS::SSM::Parameter
     Properties:
       Name: /ingestion/lambda-role
