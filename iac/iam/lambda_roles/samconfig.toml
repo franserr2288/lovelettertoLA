@@ -5,7 +5,7 @@ stack_name = "lambdaroles"
 resolve_s3 = true
 s3_prefix = "lambdaroles"
 region = "us-east-1"
-capabilities = "CAPABILITY_IAM"
+capabilities = "CAPABILITY_NAMED_IAM"
 
 [default.global.parameters]
 region = "us-east-1"

@@ -44,10 +44,9 @@ jobs:
       - name: Build/Deploy SAM
         working-directory: iac/iam/lambda_roles
         run: |
-          sam build --template roles.yaml --capabilities CAPABILITY_NAMED_IAM
+          sam build --template roles.yaml
           sam deploy \
             --config-file samconfig.toml \
             --image-repository ${{ steps.account.outputs.account_id }}.dkr.ecr.${{ matrix.region }}.amazonaws.com/${{ secrets.ECR_REPO_NAME }}
             --no-fail-on-empty-changeset \ 
-            --template-file roles.yaml \
-            --capabilities CAPABILITY_NAMED_IAM
+            --template-file roles.yaml 
