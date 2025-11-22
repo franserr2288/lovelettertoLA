@@ -3,16 +3,19 @@ Transform: AWS::Serverless-2016-10-31
 Description: A simple scheduled Lambda function
 
 Resources:
+  City311IngestionQueueDLQ:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: MyStandardQueue-DLQ
+  
   City311IngestionQueue:
     Type: AWS::SQS::Queue
     Properties:
       QueueName: MyStandardQueue
       VisibilityTimeout: 60
-
-  City311IngestionQueueDLQ:
-    Type: AWS::SQS::Queue
-    Properties:
-      QueueName: MyStandardQueue-DLQ
+      RedrivePolicy:
+        deadLetterTargetArn: !GetAtt City311IngestionQueueDLQ.Arn
+        maxReceiveCount: 2
 
   Ingestion:
     Type: AWS::Serverless::Function
@@ -25,21 +28,15 @@ Resources:
         Variables:
           BASE_URL: "https://data.lacity.org"
           SOCRATA_TOKEN_PARAM_NAME: /ingestion/SOCRATA_APP_TOKEN
-
       Policies:
         - SSMParameterReadPolicy:
             ParameterName: /ingestion/SOCRATA_APP_TOKEN
-
       Events:
         SQSQueueEvent:
           Type: SQS
           Properties:
             Queue: !GetAtt City311IngestionQueue.Arn
             BatchSize: 1
-            RedrivePolicy:
-              deadLetterTargetArn: !GetAtt City311IngestionQueueDLQ.Arn
-              maxReceiveCount: 2
-      
     Metadata:
       DockerTag: python3.12-v1
       DockerContext: city311/
@@ -54,8 +51,8 @@ Resources:
       MemorySize: 128
       Policies: 
         - SQSSendMessagePolicy:
-          QueueName: !GetAtt City311IngestionQueue.QueueName
-
+            QueueUrl: !Ref City311IngestionQueue
+            QueueName: !GetAtt City311IngestionQueue.QueueName
       Events:
         Timer:
           Type: ScheduleV2

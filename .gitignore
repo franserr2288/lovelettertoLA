@@ -16,3 +16,4 @@ secrets/
 config.json
 credentials.json
 .aws-sam/
+.python-version

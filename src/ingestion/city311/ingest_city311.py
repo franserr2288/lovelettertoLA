@@ -9,11 +9,6 @@ def handler(event, context):
     dataset_resource_id = body["DATASET_RESOURCE_ID"]
     format = body["FORMAT"]
 
-    assert format
-    assert dataset_name 
-    assert dataset_resource_id
-
-
     url = construct_url_for_full_dataset_json()
     headers = {
         'Content-Type': 'application/json',
@@ -35,7 +30,6 @@ def handler(event, context):
         wr.s3.to_parquet(df=data_frame, dataset=True, path=parquet_path, max_rows_by_file=100000)
     
 
-def construct_url_for_full_dataset_json():
+def construct_url_for_full_dataset_json(dataset_resource_id):
     base_url = os.environ["BASE_URL"]
-    resource_id = os.environ["DATASET_RESOURCE_ID"]
-    return base_url+"/api/v3/views/"+resource_id+"/query.json"
+    return base_url + "/api/v3/views/" + dataset_resource_id + "/query.json"

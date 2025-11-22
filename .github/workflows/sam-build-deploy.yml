@@ -70,4 +70,4 @@ jobs:
           TEMPLATE_DIR=$(dirname ${{ matrix.template }})
           cd $TEMPLATE_DIR
           sam build
-          sam deploy --config-file samconfig.toml --no-fail-on-empty-changeset
+          sam deploy --config-file samconfig.toml --no-fail-on-empty-changeset sam deploy --resolve-image-repos
