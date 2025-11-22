@@ -211,6 +211,12 @@ Resources:
             Action:
               - 'sts:*'
             Resource: '*'
+          - Sid: SSMParameterWriteAccess
+            Effect: Allow
+            Action:
+              - 'ssm:PutParameter'
+              - 'ssm:AddTagsToResource'
+            Resource: '*'
 
   GitHubActionsRole:
     Type: AWS::IAM::Role
