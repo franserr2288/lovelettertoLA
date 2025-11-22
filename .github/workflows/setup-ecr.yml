@@ -47,7 +47,7 @@ jobs:
         run: |
           aws cloudformation deploy \
             --stack-name ecr-repo \
-            --template-file file://ecr.yaml \
+            --template-file ecr.yaml \
             --capabilities CAPABILITY_NAMED_IAM \
             --no-fail-on-empty-changeset \
             --region ${{matrix.region}}
