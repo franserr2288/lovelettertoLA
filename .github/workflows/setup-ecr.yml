@@ -40,10 +40,9 @@ jobs:
           echo "account_id=$ACCOUNT_ID" >> $GITHUB_OUTPUT
 
       - run: |
-          aws cloudformation create-stack \
+          aws cloudformation deploy \
             --stack-name ecr-repo \
             --template-body file://iac/container_registry/ecr.yaml \
             --capabilities CAPABILITY_NAMED_IAM \
             --profile local-dev \
-            --no-fail-on-empty-changeset \
             --region us-east-1
