@@ -50,4 +50,4 @@ jobs:
             --template-file file://ecr.yaml \
             --capabilities CAPABILITY_NAMED_IAM \
             --profile local-dev \
-            --region us-east-1
+            --region ${{matrix.region}}
