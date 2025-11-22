@@ -3,7 +3,7 @@ Transform: AWS::Serverless-2016-10-31
 Description: S3 Bucket Creation
 
 Resources:
-  FsOpenDataProject:
+  FsOpenDataProjectBucket:
     Type: AWS::S3::Bucket
     Properties:
       BucketName: fs-open-data-project
@@ -28,7 +28,7 @@ Resources:
     Properties:
       Name: /shared/data-bucket-name
       Type: String
-      Value: !Ref MyBucket
+      Value: !Ref FsOpenDataProjectBucket
       Description: Name of the application S3 bucket
 
   FsOpenDataProjectBucketPolicy:
