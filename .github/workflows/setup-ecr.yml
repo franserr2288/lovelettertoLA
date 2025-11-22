@@ -42,7 +42,7 @@ jobs:
       - run: |
           aws cloudformation deploy \
             --stack-name ecr-repo \
-            --template-body file://iac/container_registry/ecr.yaml \
+            --template-file file://iac/container_registry/ecr.yaml \
             --capabilities CAPABILITY_NAMED_IAM \
             --profile local-dev \
             --region us-east-1
