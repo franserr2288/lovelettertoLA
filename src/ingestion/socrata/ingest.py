@@ -25,7 +25,7 @@ def handler(event, context):
     bucket_name = os.environ["BUCKET_NAME"]
 
     raw_data_path = f"s3://{bucket_name}/{dataset_name}/raw/data.csv"
-    parquet_path = f"s3://{bucket_name}/{dataset_resource_id}/parquet/"
+    parquet_path = f"s3://{bucket_name}/{dataset_name}/parquet/"
     
     if format == "CSV":
         wr.s3.to_csv(df=data_frame, path=raw_data_path, index=False)

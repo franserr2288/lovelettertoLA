@@ -3,26 +3,26 @@ Transform: AWS::Serverless-2016-10-31
 Description: A simple scheduled Lambda function
 
 Resources:
-  City311IngestionQueueDLQ:
+  SocrataIngestionQueueDLQ:
       Type: AWS::SQS::Queue
       Properties:
         QueueName: MyStandardQueue-DLQ
   
-  City311IngestionQueue:
+  SocrataIngestionQueue:
     Type: AWS::SQS::Queue
     Properties:
       QueueName: MyStandardQueue
       VisibilityTimeout: 60
       RedrivePolicy:
-        deadLetterTargetArn: !GetAtt City311IngestionQueueDLQ.Arn
+        deadLetterTargetArn: !GetAtt SocrataIngestionQueueDLQ.Arn
         maxReceiveCount: 2
   
-  City311IngestionQueueUrlParameter:
+  SocrataIngestionQueueUrlParameter:
     Type: AWS::SSM::Parameter
     Properties:
       Name: /ingestion/queue_url
       Type: String
-      Value: !Ref City311IngestionQueue
+      Value: !Ref SocrataIngestionQueue
       Description: URL for the processing queue
 
   Ingestion:
@@ -58,11 +58,11 @@ Resources:
         SQSQueueEvent:
           Type: SQS
           Properties:
-            Queue: !GetAtt City311IngestionQueue.Arn
+            Queue: !GetAtt SocrataIngestionQueue.Arn
             BatchSize: 1
     Metadata:
       DockerTag: python3.12-v1
-      DockerContext: city311/
+      DockerContext: socrata/
       Dockerfile: Dockerfile
 
   DatasetIngestionOrchestrator:
@@ -75,18 +75,18 @@ Resources:
       MemorySize: 128
       Policies: 
         - SQSSendMessagePolicy:
-            QueueName: !GetAtt City311IngestionQueue.QueueName
+            QueueName: !GetAtt SocrataIngestionQueue.QueueName
       Events:
         TimerCSV:
           Type: ScheduleV2
           Properties:
             ScheduleExpression: cron(0 12 * * ? *) # daily at 12pm UTC
-            Input: !Sub '{"DATASET": "CITY311", "QUEUE_NAME":"${City311IngestionQueue.QueueName}", "DATASET_RESOURCE_ID":"h73f-gn57", "FORMAT": "CSV"}'
+            Input: !Sub '{"DATASET": "CITY311", "QUEUE_NAME":"${SocrataIngestionQueue.QueueName}", "DATASET_RESOURCE_ID":"h73f-gn57", "FORMAT": "CSV"}'
         TimerParquet:
           Type: ScheduleV2
           Properties:
             ScheduleExpression: cron(0 12 * * ? *) # daily at 12pm UTC
-            Input: !Sub '{"DATASET": "CITY311", "QUEUE_NAME":"${City311IngestionQueue.QueueName}", "DATASET_RESOURCE_ID":"h73f-gn57", "FORMAT": "PARQUET"}'
+            Input: !Sub '{"DATASET": "CITY311", "QUEUE_NAME":"${SocrataIngestionQueue.QueueName}", "DATASET_RESOURCE_ID":"h73f-gn57", "FORMAT": "PARQUET"}'
             
               
 
