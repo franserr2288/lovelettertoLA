@@ -41,8 +41,6 @@ jobs:
             echo "$regions" | jq -c --arg tmpl "$template" '.[] | {template: $tmpl, region: .}'
           done | jq -s -c '{include: .}')
           echo "matrix=$MATRIX" >> $GITHUB_OUTPUT
-
-          
   deploy:
     needs: discover
     strategy:
