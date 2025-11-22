@@ -3,23 +3,11 @@ on:
   push:
     branches: [ main ]
   workflow_dispatch:
-
 permissions:
   id-token: write  
   contents: read 
 
 jobs:
-  # discover:
-  #   runs-on: ubuntu-latest
-  #   outputs:
-  #   steps:
-  #     - uses: actions/checkout@v3
-  #     - id: find-templates
-  #       run: |
-  #         # Find all template.yaml files and extract their directories
-  #         TEMPLATES=$(find . -name 'template.yaml' -o -name 'template.yml' | \
-  #           jq -R -s -c 'split("\n")[:-1] | map(select(length > 0))')
-  #         echo "templates=$TEMPLATES" >> $GITHUB_OUTPUT
   discover:
     runs-on: ubuntu-latest
     outputs:
