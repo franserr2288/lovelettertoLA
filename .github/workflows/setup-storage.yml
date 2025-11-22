@@ -41,7 +41,9 @@ jobs:
           echo "::add-mask::$ACCOUNT_ID"
           echo "account_id=$ACCOUNT_ID" >> $GITHUB_OUTPUT
 
-      - run: |
+      - name: Build/Deploy SAM
+        working-directory: iac/storage
+        run: |
           sam build
           sam deploy \
             --config-file samconfig.toml \

@@ -40,8 +40,10 @@ jobs:
           ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
           echo "::add-mask::$ACCOUNT_ID"
           echo "account_id=$ACCOUNT_ID" >> $GITHUB_OUTPUT
-
-      - run: |
+    
+      - name: Build/Deploy SAM
+        working-directory: iac/lambda_roles
+        run: |
           sam build
           sam deploy \
             --config-file samconfig.toml \

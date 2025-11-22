@@ -40,11 +40,14 @@ jobs:
           ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
           echo "::add-mask::$ACCOUNT_ID"
           echo "account_id=$ACCOUNT_ID" >> $GITHUB_OUTPUT
-
-      - run: |
+    
+      - name: Deploy CF Template
+        working-directory: iac/container_registry
+    
+        run: |
           aws cloudformation deploy \
             --stack-name ecr-repo \
-            --template-file file://iac/container_registry/ecr.yaml \
+            --template-file file://ecr.yaml \
             --capabilities CAPABILITY_NAMED_IAM \
             --profile local-dev \
             --region us-east-1
