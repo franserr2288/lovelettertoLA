@@ -43,8 +43,8 @@ Resources:
             Principal: '*'
             Action: 's3:*'
             Resource:
-              - !GetAtt FsOpenDataProject.Arn
-              - !Sub '${FsOpenDataProject.Arn}/*'
+              - !GetAtt FsOpenDataProjectBucket.Arn
+              - !Sub '${FsOpenDataProjectBucket.Arn}/*'
             Condition:
               Bool:
                 'aws:SecureTransport': 'false'
