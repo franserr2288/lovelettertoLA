@@ -1,0 +1,48 @@
+name: SAM Validate, Build, Test, Deploy
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  id-token: write   # This is required for requesting the JWT
+  contents: read 
+
+jobs:          
+  deploy:
+    strategy:
+      matrix: 
+        region: [us-east-1, us-west-2 ,ap-southeast-1, ap-southeast-2, eu-central-1]
+    runs-on: ubuntu-latest
+    environment: dev
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install Dependencies with Apt Get
+        run: |
+          sudo apt-get update
+          sudo apt-get install python3.12 jq -y
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        
+        with:
+          role-to-assume: ${{ secrets.AWS_GITHUB_ACTIONS_ROLE_ARN }}
+          aws-region: ${{ matrix.region }}
+
+      - uses: aws-actions/setup-sam@v2
+      
+      - name: Get AWS Account ID
+        id: account
+        run: |
+          ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+          echo "::add-mask::$ACCOUNT_ID"
+          echo "account_id=$ACCOUNT_ID" >> $GITHUB_OUTPUT
+
+      - run: |
+          aws cloudformation create-stack \
+            --stack-name ecr-repo \
+            --template-body file://iac/container_registry/ecr.yaml \
+            --capabilities CAPABILITY_NAMED_IAM \
+            --profile local-dev \
+            --region us-east-1
