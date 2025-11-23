@@ -82,12 +82,14 @@ Resources:
           Properties:
             ScheduleExpression: cron(0 12 * * ? *) # daily at 12pm UTC
             Input: !Sub '{"DATASET": "CITY311", "QUEUE_NAME":"${SocrataIngestionQueue.QueueName}", "DATASET_RESOURCE_ID":"h73f-gn57", "FORMAT": "CSV"}'
+            RoleArn: "{{resolve:ssm:/ingestion/scheduler-role}}"
         TimerParquet:
           Type: ScheduleV2
           Properties:
             ScheduleExpression: cron(0 12 * * ? *) # daily at 12pm UTC
             Input: !Sub '{"DATASET": "CITY311", "QUEUE_NAME":"${SocrataIngestionQueue.QueueName}", "DATASET_RESOURCE_ID":"h73f-gn57", "FORMAT": "PARQUET"}'
-            
+            RoleArn: "{{resolve:ssm:/ingestion/scheduler-role}}"
+        
               
 
 
