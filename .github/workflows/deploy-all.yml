@@ -1,5 +1,9 @@
 name: Deploy All Components
 
+permissions:
+  id-token: write   
+  contents: read 
+
 on:
   workflow_dispatch:
   push:
