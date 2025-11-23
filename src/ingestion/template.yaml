@@ -54,15 +54,7 @@ Resources:
               - s3:ListBucket
             Resource:
               - !Sub 'arn:aws:s3:::{{resolve:ssm:/shared/data-bucket-name}}'
-        - PolicyName: SQSAccess
-          PolicyDocument:
-            Statement:
-              - Effect: Allow
-                Action:
-                  - sqs:ReceiveMessage
-                  - sqs:DeleteMessage
-                  - sqs:GetQueueAttributes
-                Resource: !GetAtt SocrataIngestionQueue.Arn
+
       Events:
         SQSQueueEvent:
           Type: SQS
