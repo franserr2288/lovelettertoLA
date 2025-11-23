@@ -3,6 +3,7 @@ Transform: AWS::Serverless-2016-10-31
 Description: Lambda IAM roles
 
 Resources:
+  # Role for Ingestion Components (strip out later)
   IngestionLambdaRole:
     Type: AWS::IAM::Role
     Properties:
@@ -19,7 +20,7 @@ Resources:
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
         - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly
-        
+
       Policies:
         - PolicyName: SQSAccess
           PolicyDocument:
@@ -43,20 +44,21 @@ Resources:
                   - ssm:GetParameters
                 Resource: !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/ingestion/SOCRATA_APP_TOKEN'
         - PolicyName: S3 Access
-          Version: '2012-10-17'
-          Statement: 
-          - Effect: Allow
-            Action:
-              - s3:GetObject
-              - s3:PutObject
-              - s3:DeleteObject
-            Resource:
-              - !Sub 'arn:aws:s3:::{{resolve:ssm:/shared/data-bucket-name}}/*'
-          - Effect: Allow
-            Action:
-              - s3:ListBucket
-            Resource:
-              - !Sub 'arn:aws:s3:::{{resolve:ssm:/shared/data-bucket-name}}'
+          PolicyDocument: 
+            Version: '2012-10-17'
+            Statement: 
+            - Effect: Allow
+              Action:
+                - s3:GetObject
+                - s3:PutObject
+                - s3:DeleteObject
+              Resource:
+                - !Sub 'arn:aws:s3:::{{resolve:ssm:/shared/data-bucket-name}}/*'
+            - Effect: Allow
+              Action:
+                - s3:ListBucket
+              Resource:
+                - !Sub 'arn:aws:s3:::{{resolve:ssm:/shared/data-bucket-name}}'
        
   
   StoreIngestionLambdaRoleArn:
@@ -66,6 +68,7 @@ Resources:
       Type: String
       Value: !GetAtt IngestionLambdaRole.Arn
   
+  # Role for Scheduler to invoke a lambda
   SchedulerInvokeRole:
     Type: AWS::IAM::Role
     Properties:
@@ -92,12 +95,5 @@ Resources:
       Name: /ingestion/scheduler-role
       Type: String
       Value: !GetAtt SchedulerInvokeRole.Arn
-
-
-Outputs:
-  IngestionLambdaRoleArn:
-    Value: !GetAtt IngestionLambdaRole.Arn
-    Export:
-      Name: ingestion-lambda-role-arn
   
 
