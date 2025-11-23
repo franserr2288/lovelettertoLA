@@ -39,6 +39,8 @@ Resources:
           BASE_URL: "https://data.lacity.org"
           SOCRATA_TOKEN_PARAM_NAME: /ingestion/SOCRATA_APP_TOKEN
           BUCKET_NAME: "{{resolve:ssm:/shared/data-bucket-name}}"
+          # param it later
+          ENVIRONMENT: dev
 
       Events:
         SQSQueueEvent:

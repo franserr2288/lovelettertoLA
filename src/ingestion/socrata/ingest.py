@@ -3,10 +3,12 @@ import requests, os, json
 import awswrangler as wr 
 import pandas as pd
 import traceback
+from helper import setup_logger
 
+logger = setup_logger(__name__)
 
 def handler(event, context):
-    print(event)
+    logger.info(f"Event: {json.dumps(event)}")
     try:
         # batch size 1
         body = json.loads(event["Records"][0]["body"])
@@ -35,11 +37,11 @@ def handler(event, context):
             parquet_path = f"s3://{bucket_name}/{dataset_name}/parquet/"
             wr.s3.to_parquet(df=data_frame, dataset=True, path=parquet_path, max_rows_by_file=100000)
         else:
+            logger.error("Invalid input, only supporting CSV or PARQUET")
             raise ValueError
     
     except Exception as e:
-        print(e)
-        traceback.print_list()
+        logger.exception(f"Exception: {json.dumps(e)}")
         raise
 
 
