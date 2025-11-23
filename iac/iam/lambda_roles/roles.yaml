@@ -19,6 +19,7 @@ Resources:
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
         - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly
+  
   StoreIngestionLambdaRoleArn:
     Type: AWS::SSM::Parameter
     Properties:
@@ -44,13 +45,14 @@ Resources:
             Statement:
               - Effect: Allow
                 Action: lambda:InvokeFunction
-                Resource: "arn:aws:lambda:*:*:function:DatasetIngestionOrchestrator"
+                Resource: !Sub "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:DatasetIngestionOrchestrator*"
+                
   StoreSchedulerRoleArn:
     Type: AWS::SSM::Parameter
     Properties:
       Name: /ingestion/scheduler-role
       Type: String
-      Value: !GetAtt IngestionLambdaRole.Arn
+      Value: !GetAtt SchedulerInvokeRole.Arn
 
 
 Outputs:
