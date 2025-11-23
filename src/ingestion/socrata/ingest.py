@@ -6,6 +6,7 @@ import traceback
 
 
 def handler(event, context):
+    print(event)
     try:
         # batch size 1
         body = json.loads(event["Records"][0]["body"])
