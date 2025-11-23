@@ -19,6 +19,7 @@ Resources:
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
         - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly
+        
       Policies:
         - PolicyName: SQSAccess
           PolicyDocument:
@@ -32,6 +33,8 @@ Resources:
                   - sqs:GetQueueAttributes
                   - sqs:GetQueueUrl
                 Resource: !Sub 'arn:aws:sqs:*:${AWS::AccountId}:*'
+        - SSMParameterReadPolicy:
+            ParameterName: /ingestion/SOCRATA_APP_TOKEN
   
   StoreIngestionLambdaRoleArn:
     Type: AWS::SSM::Parameter
