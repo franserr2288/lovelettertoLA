@@ -29,6 +29,7 @@ Resources:
                   - sqs:ReceiveMessage
                   - sqs:DeleteMessage
                   - sqs:GetQueueAttributes
+                  - sqs:GetQueueUrl
                 Resource: !Sub 'arn:aws:sqs:*:${AWS::AccountId}:*'
   
   StoreIngestionLambdaRoleArn:
