@@ -19,10 +19,36 @@ Resources:
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
         - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly
-  StoreRoleArn:
+  StoreIngestionLambdaRoleArn:
     Type: AWS::SSM::Parameter
     Properties:
       Name: /ingestion/lambda-role
+      Type: String
+      Value: !GetAtt IngestionLambdaRole.Arn
+  
+  SchedulerInvokeRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: IngestionSchedulerRole
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: scheduler.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: InvokeLambda
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action: lambda:InvokeFunction
+                Resource: "arn:aws:lambda:*:*:function:DatasetIngestionOrchestrator"
+  StoreSchedulerRoleArn:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: /ingestion/scheduler-role
       Type: String
       Value: !GetAtt IngestionLambdaRole.Arn
 
