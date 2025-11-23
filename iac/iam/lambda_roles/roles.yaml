@@ -42,6 +42,22 @@ Resources:
                   - ssm:GetParameter
                   - ssm:GetParameters
                 Resource: !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/ingestion/SOCRATA_APP_TOKEN'
+        - PolicyName: S3 Access
+          Version: '2012-10-17'
+          Statement: 
+          - Effect: Allow
+            Action:
+              - s3:GetObject
+              - s3:PutObject
+              - s3:DeleteObject
+            Resource:
+              - !Sub 'arn:aws:s3:::{{resolve:ssm:/shared/data-bucket-name}}/*'
+          - Effect: Allow
+            Action:
+              - s3:ListBucket
+            Resource:
+              - !Sub 'arn:aws:s3:::{{resolve:ssm:/shared/data-bucket-name}}'
+       
   
   StoreIngestionLambdaRoleArn:
     Type: AWS::SSM::Parameter
