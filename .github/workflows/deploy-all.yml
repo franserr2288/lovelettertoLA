@@ -7,14 +7,30 @@ on:
 
 jobs:
   deploy-registries:
+    secrets: inherit
+    permissions:
+      id-token: write
+      contents: read
     uses: ./.github/workflows/deploy-ecr.yml
     
   deploy-lambda-roles:
+    secrets: inherit
+    permissions:
+      id-token: write
+      contents: read
     uses: ./.github/workflows/deploy-lambda-roles.yml
     
   deploy-storage:
+    secrets: inherit
+    permissions:
+      id-token: write
+      contents: read
     uses: ./.github/workflows/deploy-storage.yml
     
   deploy-microservices:
+    secrets: inherit
+    permissions:
+      id-token: write
+      contents: read
     needs: [deploy-registries, deploy-lambda-roles, deploy-storage]
     uses: ./.github/workflows/deploy-microservices.yml
