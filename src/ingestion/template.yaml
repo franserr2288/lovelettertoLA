@@ -38,23 +38,6 @@ Resources:
         Variables:
           BASE_URL: "https://data.lacity.org"
           SOCRATA_TOKEN_PARAM_NAME: /ingestion/SOCRATA_APP_TOKEN
-      Policies:
-        - SSMParameterReadPolicy:
-            ParameterName: /ingestion/SOCRATA_APP_TOKEN
-        - Version: '2012-10-17'
-          Statement:
-          - Effect: Allow
-            Action:
-              - s3:GetObject
-              - s3:PutObject
-              - s3:DeleteObject
-            Resource:
-              - !Sub 'arn:aws:s3:::{{resolve:ssm:/shared/data-bucket-name}}/*'
-          - Effect: Allow
-            Action:
-              - s3:ListBucket
-            Resource:
-              - !Sub 'arn:aws:s3:::{{resolve:ssm:/shared/data-bucket-name}}'
 
       Events:
         SQSQueueEvent:
