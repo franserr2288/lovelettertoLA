@@ -19,6 +19,7 @@ Resources:
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
         - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly
+  StoreRoleArn:
     Type: AWS::SSM::Parameter
     Properties:
       Name: /ingestion/lambda-role
