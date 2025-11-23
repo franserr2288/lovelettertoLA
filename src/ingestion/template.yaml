@@ -54,6 +54,12 @@ Resources:
               - s3:ListBucket
             Resource:
               - !Sub 'arn:aws:s3:::{{resolve:ssm:/shared/data-bucket-name}}'
+          - Effect: Allow
+            Action:
+              - sqs:RecieveEvent
+            Resource:
+              - !GetAtt SocrataIngestionQueue.Arn
+        
       Events:
         SQSQueueEvent:
           Type: SQS
