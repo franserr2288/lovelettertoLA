@@ -190,6 +190,9 @@ Resources:
               - 'ecr:DeleteRepository'
               - 'ecr:DescribeRepositories'
               - 'ecr:PutLifecyclePolicy'
+              - 'ecr:GetRepositoryPolicy'
+              - 'ecr:SetRepositoryPolicy'
+              - 'ecr:InitiateLayerUpload'
             Resource: '*'
           
           - Sid: SecretsManagerReadAccess
