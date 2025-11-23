@@ -13,19 +13,20 @@ jobs:
       contents: read
     uses: ./.github/workflows/deploy-ecr.yml
     
-  deploy-lambda-roles:
-    secrets: inherit
-    permissions:
-      id-token: write
-      contents: read
-    uses: ./.github/workflows/deploy-lambda-roles.yml
-    
   deploy-storage:
     secrets: inherit
     permissions:
       id-token: write
       contents: read
     uses: ./.github/workflows/deploy-storage.yml
+
+  deploy-lambda-roles:
+    secrets: inherit
+    permissions:
+        id-token: write
+        contents: read
+    uses: ./.github/workflows/deploy-lambda-roles.yml
+    needs: [deploy-storage]
     
   deploy-microservices:
     secrets: inherit
