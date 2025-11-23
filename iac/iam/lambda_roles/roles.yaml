@@ -43,7 +43,7 @@ Resources:
                   - ssm:GetParameter
                   - ssm:GetParameters
                 Resource: !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/ingestion/SOCRATA_APP_TOKEN'
-        - PolicyName: S3 Access
+        - PolicyName: BucketAccess
           PolicyDocument: 
             Version: '2012-10-17'
             Statement: 
