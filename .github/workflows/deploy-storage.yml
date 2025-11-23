@@ -1,10 +1,12 @@
-name: Create Lambda Roles for App Components
+name: Set Up Storage
 on:
   push:
     branches: [ main ]
     paths:
-        - "iac/iam/lambda-roles/**"
+        - "iac/storage/**"
   workflow_dispatch:
+  workflow_call: 
+
 
 permissions:
   id-token: write   
@@ -40,14 +42,12 @@ jobs:
           ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
           echo "::add-mask::$ACCOUNT_ID"
           echo "account_id=$ACCOUNT_ID" >> $GITHUB_OUTPUT
-    
+
       - name: Build/Deploy SAM
-        working-directory: iac/iam/lambda_roles
+        working-directory: iac/storage
         run: |
-          sam build --template roles.yaml
+          sam build --template s3.yaml
           sam deploy \
             --config-file samconfig.toml \
             --image-repository ${{ steps.account.outputs.account_id }}.dkr.ecr.${{ matrix.region }}.amazonaws.com/${{ secrets.ECR_REPO_NAME }} \
-            --region ${{matrix.region}} \
-            --no-fail-on-empty-changeset \ 
-            
+            --no-fail-on-empty-changeset

@@ -1,0 +1,21 @@
+name: Deploy All Components
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+jobs:
+  deploy-registries:
+    uses: ./.github/workflows/deploy-ecr.yml
+    
+  deploy-lambda-roles:
+    uses: ./.github/workflows/deploy-lambda-roles.yml
+    
+  deploy-storage:
+    needs: [deploy-registries]
+    uses: ./.github/workflows/deploy-storage.yml
+    
+  deploy-microservices:
+    needs: [deploy-registries, deploy-lambda-roles, deploy-storage]
+    uses: ./.github/workflows/deploy-microservices.yml
