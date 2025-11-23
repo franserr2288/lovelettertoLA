@@ -2,36 +2,43 @@ import boto3
 import requests, os, json
 import awswrangler as wr 
 import pandas as pd
+import traceback
 
 
 def handler(event, context):
-    # batch size 1
-    body = json.loads(event["Records"][0]["body"])
-    dataset_name = body["DATASET_NAME"]
-    dataset_resource_id = body["DATASET_RESOURCE_ID"]
-    format = body["FORMAT"]
+    try:
+        # batch size 1
+        body = json.loads(event["Records"][0]["body"])
+        dataset_name = body["DATASET_NAME"]
+        dataset_resource_id = body["DATASET_RESOURCE_ID"]
+        format = body["FORMAT"]
 
 
-    url = construct_url_for_full_dataset_json(dataset_resource_id)
-    headers = {
-        'Content-Type': 'application/json',
-        'X-App-Token': get_app_token(),
-    }
+        url = construct_url_for_full_dataset_json(dataset_resource_id)
+        headers = {
+            'Content-Type': 'application/json',
+            'X-App-Token': get_app_token(),
+        }
 
-    response = requests.get(url=url, headers=headers)
-    data = response.json()
+        response = requests.get(url=url, headers=headers)
+        data = response.json()
 
-    data_frame = pd.DataFrame(data)
-    bucket_name = os.environ["BUCKET_NAME"]
+        data_frame = pd.DataFrame(data)
+        bucket_name = os.environ["BUCKET_NAME"]
 
-    raw_data_path = f"s3://{bucket_name}/{dataset_name}/raw/data.csv"
-    parquet_path = f"s3://{bucket_name}/{dataset_name}/parquet/"
-    
-    if format == "CSV":
-        wr.s3.to_csv(df=data_frame, path=raw_data_path, index=False)
-    else:
-        wr.s3.to_parquet(df=data_frame, dataset=True, path=parquet_path, max_rows_by_file=100000)
-    
+        raw_data_path = f"s3://{bucket_name}/{dataset_name}/raw/data.csv"
+        parquet_path = f"s3://{bucket_name}/{dataset_name}/parquet/"
+        
+        if format == "CSV":
+            wr.s3.to_csv(df=data_frame, path=raw_data_path, index=False)
+        else:
+            wr.s3.to_parquet(df=data_frame, dataset=True, path=parquet_path, max_rows_by_file=100000)
+        
+    except Exception as e:
+        print(e)
+        traceback.print_list()
+        raise
+
 
 def construct_url_for_full_dataset_json(dataset_resource_id):
     base_url = os.environ["BASE_URL"]
