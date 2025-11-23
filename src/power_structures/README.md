@@ -1,1 +1,0 @@
-Need to do more research to get an idea of where soft/hard power is in the city, I don't know the exact topology other than the obvious positions
