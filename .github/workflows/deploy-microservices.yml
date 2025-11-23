@@ -1,4 +1,4 @@
-name: SAM Build and Deploy
+name: Deploy Microservices with SAM
 on:
   workflow_dispatch:
   workflow_call: 

@@ -1,4 +1,4 @@
-name: Set Up ECR Repo
+name: Deploy ECR Repos
 on:
   push:
     branches: [ main ]

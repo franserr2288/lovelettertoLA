@@ -1,4 +1,4 @@
-name: Set Up Storage
+name: Deploy Storage
 on:
   push:
     branches: [ main ]
