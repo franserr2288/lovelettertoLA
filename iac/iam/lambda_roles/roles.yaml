@@ -27,6 +27,7 @@ Resources:
               - Effect: Allow
                 Action:
                   - sqs:ReceiveMessage
+                  - sqs:SendMessage
                   - sqs:DeleteMessage
                   - sqs:GetQueueAttributes
                   - sqs:GetQueueUrl
