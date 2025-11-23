@@ -6,12 +6,13 @@ Resources:
   SocrataIngestionQueueDLQ:
       Type: AWS::SQS::Queue
       Properties:
-        QueueName: MyStandardQueue-DLQ
+        QueueName: SocrataIngestionQueue-DLQ
   
   SocrataIngestionQueue:
     Type: AWS::SQS::Queue
     Properties:
-      QueueName: MyStandardQueue
+      QueueName: SocrataIngestionQueue
+
       VisibilityTimeout: 60
       RedrivePolicy:
         deadLetterTargetArn: !GetAtt SocrataIngestionQueueDLQ.Arn
