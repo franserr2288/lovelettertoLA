@@ -56,7 +56,7 @@ Resources:
               - !Sub 'arn:aws:s3:::{{resolve:ssm:/shared/data-bucket-name}}'
           - Effect: Allow
             Action:
-              - sqs:RecieveMessage
+              - sqs:ReceiveMessage
             Resource:
               - !GetAtt SocrataIngestionQueue.Arn
         
