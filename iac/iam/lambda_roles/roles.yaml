@@ -33,8 +33,15 @@ Resources:
                   - sqs:GetQueueAttributes
                   - sqs:GetQueueUrl
                 Resource: !Sub 'arn:aws:sqs:*:${AWS::AccountId}:*'
-        - SSMParameterReadPolicy:
-          ParameterName: /ingestion/SOCRATA_APP_TOKEN
+        - PolicyName: SSMParameterAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - ssm:GetParameter
+                  - ssm:GetParameters
+                Resource: !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/ingestion/SOCRATA_APP_TOKEN'
   
   StoreIngestionLambdaRoleArn:
     Type: AWS::SSM::Parameter
