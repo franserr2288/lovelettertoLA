@@ -1,0 +1,1 @@
+strip out the individual iam roles instead of doing it component wide, need more granualarity for security but right now i just want to get the ball rolling. mediun priority after initial proof of concept is done
