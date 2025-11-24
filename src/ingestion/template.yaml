@@ -31,7 +31,7 @@ Resources:
     Properties:
       PackageType: Image
       MemorySize: 2048
-      Timeout: 30
+      Timeout: 600
       Role: "{{resolve:ssm:/ingestion/lambda-role}}"
       Environment:
         Variables:
