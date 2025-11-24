@@ -60,9 +60,6 @@ Resources:
       Runtime: python3.12
       Role: "{{resolve:ssm:/ingestion/lambda-role}}"
       MemorySize: 128
-      Policies: 
-        - SQSSendMessagePolicy:
-            QueueName: !GetAtt SocrataIngestionQueue.QueueName
       Events:
         TimerCSV:
           Type: ScheduleV2

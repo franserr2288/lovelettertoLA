@@ -42,7 +42,9 @@ Resources:
                 Action:
                   - ssm:GetParameter
                   - ssm:GetParameters
-                Resource: !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/ingestion/SOCRATA_APP_TOKEN'
+                Resource: 
+                  - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/ingestion/SOCRATA_APP_TOKEN'
+                  - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/shared/data-bucket-name'
         - PolicyName: BucketAccess
           PolicyDocument: 
             Version: '2012-10-17'
