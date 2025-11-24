@@ -30,7 +30,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       PackageType: Image
-      MemorySize: 1024
+      MemorySize: 2048
       Timeout: 30
       Role: "{{resolve:ssm:/ingestion/lambda-role}}"
       Environment:
