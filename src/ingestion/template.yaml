@@ -13,10 +13,10 @@ Resources:
     Properties:
       QueueName: SocrataIngestionQueue
 
-      VisibilityTimeout: 60
+      VisibilityTimeout: 900
       RedrivePolicy:
         deadLetterTargetArn: !GetAtt SocrataIngestionQueueDLQ.Arn
-        maxReceiveCount: 2
+        maxReceiveCount: 1
   
   SocrataIngestionQueueUrlParameter:
     Type: AWS::SSM::Parameter
@@ -31,7 +31,7 @@ Resources:
     Properties:
       PackageType: Image
       MemorySize: 2048
-      Timeout: 600
+      Timeout: 900
       Role: "{{resolve:ssm:/ingestion/lambda-role}}"
       Environment:
         Variables:
