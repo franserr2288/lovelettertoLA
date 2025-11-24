@@ -48,6 +48,7 @@ Resources:
             Queue: !GetAtt SocrataIngestionQueue.Arn
             BatchSize: 1
     Metadata:
+      DockerTag: python3.12-v2
       DockerContext: socrata/
       Dockerfile: Dockerfile
 
