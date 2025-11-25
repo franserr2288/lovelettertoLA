@@ -17,7 +17,7 @@ Resources:
     Type: AWS::IAM::ManagedPolicy
     Properties:
       ManagedPolicyName: GitHubActionsSAMDeployPolicy
-      Description: Policy for GitHub Actions to depldespotoy SAM applications
+      Description: Policy for GitHub Actions to deploy SAM applications
       PolicyDocument:
         Version: '2012-10-17'
         Statement:
@@ -225,11 +225,18 @@ Resources:
             Action:
               - 'sts:*'
             Resource: '*'
+
           - Sid: SSMParameterWriteAccess
             Effect: Allow
             Action:
               - 'ssm:PutParameter'
               - 'ssm:AddTagsToResource'
+            Resource: '*'
+
+          - Sid: WAFV2Access
+            Effect: Allow
+            Action:
+              - 'wafv2:*'
             Resource: '*'
           
           - Sid: CognitoUserPoolAccess
