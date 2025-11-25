@@ -54,8 +54,6 @@ Resources:
   
   HealthCheckFunction:
     Type: AWS::Serverless::Function
-    DependsOn:
-      - ApiGateway
     Properties:
       Handler: health_check.handler
       Runtime: python3.12
@@ -76,8 +74,7 @@ Resources:
 
   ApiKey:
     Type: AWS::ApiGateway::ApiKey
-    DependsOn:
-      - ApiGateway
+    # DependsOn:
     Properties:
       Name: !Sub '${AWS::StackName}-api-key'
       Description: API Key for protected endpoints
@@ -86,8 +83,8 @@ Resources:
   # building in public, limit my exposure
   UsagePlan:
     Type: AWS::ApiGateway::UsagePlan
-    DependsOn:
-      - ApiGateway
+    # DependsOn:
+    #   - ApiGateway
     Properties:
       UsagePlanName: !Sub '${AWS::StackName}-usage-plan'
       Description: Usage plan with throttling and quota limits
@@ -104,9 +101,9 @@ Resources:
   # if key is leaked accidentally
   UsagePlanKey:
     Type: AWS::ApiGateway::UsagePlanKey
-    DependsOn:
-      - ApiKey
-      - UsagePlan
+    # DependsOn:
+    #   - ApiKey
+    #   - UsagePlan
 
     Properties:
       KeyId: !Ref ApiKey
@@ -167,8 +164,8 @@ Resources:
 
   ApiWebACLAssociation:
     Type: AWS::WAFv2::WebACLAssociation
-    DependsOn:
-      - ApiGateway
+    # DependsOn:
+    #   - ApiGateway
     Properties:
       ResourceArn: !Sub 'arn:aws:apigateway:${AWS::Region}::/restapis/${ApiGateway}/stages/${Environment}'
       WebACLArn: !GetAtt ApiWebACL.Arn
