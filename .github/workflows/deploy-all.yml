@@ -27,11 +27,20 @@ jobs:
         contents: read
     uses: ./.github/workflows/deploy-lambda-roles.yml
     needs: [deploy-storage]
+
+
+    
+  deploy-gateway:
+    secrets: inherit
+    permissions:
+      id-token: write
+      contents: read
+    uses: ./.github/workflows/deploy-api-gateway-and-auth.yml
     
   deploy-microservices:
     secrets: inherit
     permissions:
       id-token: write
       contents: read
-    needs: [deploy-registries, deploy-lambda-roles, deploy-storage]
+    needs: [deploy-registries, deploy-lambda-roles, deploy-storage, deploy-gateway]
     uses: ./.github/workflows/deploy-microservices.yml
