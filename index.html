@@ -136,6 +136,31 @@
             animation: fadeIn 1s ease-out 1.2s backwards;
             letter-spacing: 1px;
         }
+        .repo-section {
+            margin-bottom: 2rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        
+        .repo-link {
+            display: inline-block;
+            color: #ff6432;
+            text-decoration: none;
+            font-size: 0.95rem;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+            opacity: 0.8;
+        }
+        
+        .repo-link:hover {
+            opacity: 1;
+            transform: translateX(5px);
+        }
+        
+        .repo-link::before {
+            content: '→ ';
+            opacity: 0.5;
+        }
         
         @keyframes fadeInDown {
             from {
@@ -198,6 +223,9 @@
         </header>
         
         <div class="content-card">
+            <div class="repo-section">
+                <a href="https://github.com/franserr2288/lovelettertoLA/tree/dev" class="repo-link" target="_blank" rel="noopener noreferrer">View Project</a>
+            </div>
             <div class="intro-text">
                 <p>Process</p>
             </div>
