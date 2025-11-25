@@ -49,6 +49,20 @@ Resources:
         Format: '$context.requestId $context.extendedRequestId $context.identity.sourceIp $context.requestTime $context.httpMethod $context.routeKey $context.status $context.protocol $context.responseLength'
       Tags:
         Environment: !Ref Environment
+  
+  HealthCheckFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: health_check.handler
+      Runtime: python3.12
+      CodeUri: .
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /health
+            Method: get
+            RestApiId: !Ref ApiGateway # Reference the API in this same stack
 
   ApiAccessLogGroup:
     Type: AWS::Logs::LogGroup
