@@ -54,6 +54,8 @@ Resources:
   
   HealthCheckFunction:
     Type: AWS::Serverless::Function
+    DependsOn:
+      - ApiGateway
     Properties:
       Handler: health_check.handler
       Runtime: python3.12
@@ -64,7 +66,7 @@ Resources:
           Properties:
             Path: /health
             Method: get
-            RestApiId: !Ref ApiGateway # Reference the API in this same stack
+            RestApiId: !Ref ApiGateway
 
   ApiAccessLogGroup:
     Type: AWS::Logs::LogGroup
@@ -102,6 +104,10 @@ Resources:
   # if key is leaked accidentally
   UsagePlanKey:
     Type: AWS::ApiGateway::UsagePlanKey
+    DependsOn:
+      - ApiKey
+      - UsagePlan
+
     Properties:
       KeyId: !Ref ApiKey
       KeyType: API_KEY
