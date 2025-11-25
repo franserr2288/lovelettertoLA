@@ -83,8 +83,8 @@ Resources:
   # building in public, limit my exposure
   UsagePlan:
     Type: AWS::ApiGateway::UsagePlan
-    # DependsOn:
-    #   - ApiGateway
+    DependsOn:
+      - ApiGatewayStage
     Properties:
       UsagePlanName: !Sub '${AWS::StackName}-usage-plan'
       Description: Usage plan with throttling and quota limits
@@ -164,8 +164,8 @@ Resources:
 
   ApiWebACLAssociation:
     Type: AWS::WAFv2::WebACLAssociation
-    # DependsOn:
-    #   - ApiGateway
+    DependsOn:
+      - ApiGatewayStage
     Properties:
       ResourceArn: !Sub 'arn:aws:apigateway:${AWS::Region}::/restapis/${ApiGateway}/stages/${Environment}'
       WebACLArn: !GetAtt ApiWebACL.Arn
