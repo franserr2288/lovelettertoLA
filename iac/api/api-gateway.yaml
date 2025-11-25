@@ -23,6 +23,8 @@ Parameters:
 Resources: 
   ApiGateway:
     Type: AWS::Serverless::Api
+    DependsOn:
+      - ApiAccessLogGroup
     Properties:
       StageName: !Ref Environment
       EndpointConfiguration:
@@ -73,7 +75,7 @@ Resources:
   ApiKey:
     Type: AWS::ApiGateway::ApiKey
     DependsOn:
-      - ApiGatewayStage
+      - ApiGateway
     Properties:
       Name: !Sub '${AWS::StackName}-api-key'
       Description: API Key for protected endpoints
@@ -83,7 +85,7 @@ Resources:
   UsagePlan:
     Type: AWS::ApiGateway::UsagePlan
     DependsOn:
-      - ApiGatewayStage
+      - ApiGateway
     Properties:
       UsagePlanName: !Sub '${AWS::StackName}-usage-plan'
       Description: Usage plan with throttling and quota limits
@@ -159,6 +161,8 @@ Resources:
 
   ApiWebACLAssociation:
     Type: AWS::WAFv2::WebACLAssociation
+    DependsOn:
+      - ApiGateway
     Properties:
       ResourceArn: !Sub 'arn:aws:apigateway:${AWS::Region}::/restapis/${ApiGateway}/stages/${Environment}'
       WebACLArn: !GetAtt ApiWebACL.Arn
