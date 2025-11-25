@@ -23,8 +23,8 @@ Parameters:
 Resources: 
   ApiGateway:
     Type: AWS::Serverless::Api
-    DependsOn:
-      - ApiAccessLogGroup
+    # DependsOn:
+    #   - ApiAccessLogGroup
     Properties:
       StageName: !Ref Environment
       EndpointConfiguration:
@@ -43,12 +43,12 @@ Resources:
           HttpMethod: '*'
           ThrottlingRateLimit: !Ref ThrottleRateLimit
           ThrottlingBurstLimit: !Ref ThrottleBurstLimit
-          LoggingLevel: INFO
-          DataTraceEnabled: true
+          # LoggingLevel: INFO
+          # DataTraceEnabled: true
           MetricsEnabled: true
-      AccessLogSetting:
-        DestinationArn: !GetAtt ApiAccessLogGroup.Arn
-        Format: '$context.requestId $context.extendedRequestId $context.identity.sourceIp $context.requestTime $context.httpMethod $context.routeKey $context.status $context.protocol $context.responseLength'
+      # AccessLogSetting:
+      #   DestinationArn: !GetAtt ApiAccessLogGroup.Arn
+      #   Format: '$context.requestId $context.extendedRequestId $context.identity.sourceIp $context.requestTime $context.httpMethod $context.routeKey $context.status $context.protocol $context.responseLength'
       Tags:
         Environment: !Ref Environment
   
@@ -66,11 +66,11 @@ Resources:
             Method: get
             RestApiId: !Ref ApiGateway
 
-  ApiAccessLogGroup:
-    Type: AWS::Logs::LogGroup
-    Properties:
-      LogGroupName: !Sub '/aws/apigateway/${AWS::StackName}-access-logs'
-      RetentionInDays: 30
+  # ApiAccessLogGroup:
+  #   Type: AWS::Logs::LogGroup
+  #   Properties:
+  #     LogGroupName: !Sub '/aws/apigateway/${AWS::StackName}-access-logs'
+  #     RetentionInDays: 30
 
   ApiKey:
     Type: AWS::ApiGateway::ApiKey
