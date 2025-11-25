@@ -17,7 +17,7 @@ Resources:
     Type: AWS::IAM::ManagedPolicy
     Properties:
       ManagedPolicyName: GitHubActionsSAMDeployPolicy
-      Description: Policy for GitHub Actions to deploy SAM applications
+      Description: Core SAM deployment permissions
       PolicyDocument:
         Version: '2012-10-17'
         Statement:
@@ -31,25 +31,10 @@ Resources:
             Action: 'lambda:*'
             Resource: '*'
           
-
-          
           - Sid: CloudFormationAccess
             Effect: Allow
             Action:
-              - 'cloudformation:CreateStack'
-              - 'cloudformation:UpdateStack'
-              - 'cloudformation:DeleteStack'
-              - 'cloudformation:DescribeStacks'
-              - 'cloudformation:DescribeStackEvents'
-              - 'cloudformation:DescribeStackResources'
-              - 'cloudformation:GetTemplate'
-              - 'cloudformation:ValidateTemplate'
-              - 'cloudformation:CreateChangeSet'
-              - 'cloudformation:DescribeChangeSet'
-              - 'cloudformation:ExecuteChangeSet'
-              - 'cloudformation:DeleteChangeSet'
-              - 'cloudformation:ListStacks'
-              - 'cloudformation:GetTemplateSummary'
+              - 'cloudformation:*'
             Resource: '*'
           
           - Sid: IAMRoleManagement
@@ -69,7 +54,6 @@ Resources:
               - 'iam:UpdateAssumeRolePolicy'
               - 'iam:TagRole'
               - 'iam:UntagRole'
-            # make this more strict later
             Resource:
               - 'arn:aws:iam::*:role/*-LambdaExecutionRole-*'
               - 'arn:aws:iam::*:role/*-FunctionRole-*'
@@ -86,204 +70,79 @@ Resources:
               - 'iam:GetPolicy'
               - 'iam:GetPolicyVersion'
               - 'iam:ListPolicyVersions'
-            Resource: 'arn:aws:iam::*:policy/*'
+              - 'iam:CreateServiceLinkedRole'
+            Resource: '*'
           
           - Sid: LogsAccess
             Effect: Allow
             Action:
-              - 'logs:CreateLogGroup'
-              - 'logs:DeleteLogGroup'
-              - 'logs:DescribeLogGroups'
-              - 'logs:PutRetentionPolicy'
-              - 'logs:TagLogGroup'
-              - 'logs:UntagLogGroup'
+              - 'logs:*'
             Resource: '*'
           
           - Sid: APIGatewayAccess
             Effect: Allow
             Action:
-              - 'apigateway:GET'
-              - 'apigateway:POST'
-              - 'apigateway:PUT'
-              - 'apigateway:PATCH'
-              - 'apigateway:DELETE'
-            Resource: '*'
-
-          - Sid: APIGatewayV2Access
-            Effect: Allow
-            Action:
               - 'apigateway:*'
               - 'apigatewayv2:*'
             Resource: '*'
-          
+
+  GitHubActionsAWSServicesPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      ManagedPolicyName: GitHubActionsAWSServicesPolicy
+      Description: AWS services access for SAM deployment
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
           - Sid: EventBridgeAccess
             Effect: Allow
             Action:
-              - 'events:PutRule'
-              - 'events:DeleteRule'
-              - 'events:DescribeRule'
-              - 'events:PutTargets'
-              - 'events:RemoveTargets'
-              - 'events:ListTargetsByRule'
-              - 'events:TagResource'
-              - 'events:UntagResource'
-            Resource: '*'
-          
-          - Sid: EventBridgeSchedulerAccess
-            Effect: Allow
-            Action:
-              - 'scheduler:CreateSchedule'
-              - 'scheduler:GetSchedule'
-              - 'scheduler:UpdateSchedule'
-              - 'scheduler:DeleteSchedule'
-              - 'scheduler:ListSchedules'
-              - 'scheduler:CreateScheduleGroup'
-              - 'scheduler:GetScheduleGroup'
-              - 'scheduler:DeleteScheduleGroup'
-              - 'scheduler:ListScheduleGroups'
-              - 'scheduler:TagResource'
-              - 'scheduler:UntagResource'
-              - 'scheduler:ListTagsForResource'
+              - 'events:*'
+              - 'scheduler:*'
             Resource: '*'
           
           - Sid: SQSAccess
             Effect: Allow
-            Action:
-              - 'sqs:CreateQueue'
-              - 'sqs:DeleteQueue'
-              - 'sqs:GetQueueAttributes'
-              - 'sqs:SetQueueAttributes'
-              - 'sqs:TagQueue'
-              - 'sqs:UntagQueue'
-              - 'sqs:ListQueues'
+            Action: 'sqs:*'
             Resource: '*'
           
           - Sid: SNSAccess
             Effect: Allow
-            Action:
-              - 'sns:CreateTopic'
-              - 'sns:DeleteTopic'
-              - 'sns:GetTopicAttributes'
-              - 'sns:SetTopicAttributes'
-              - 'sns:Subscribe'
-              - 'sns:Unsubscribe'
-              - 'sns:TagResource'
-              - 'sns:UntagResource'
+            Action: 'sns:*'
             Resource: '*'
           
           - Sid: DynamoDBAccess
             Effect: Allow
-            Action:
-              - 'dynamodb:CreateTable'
-              - 'dynamodb:UpdateTable'
-              - 'dynamodb:DeleteTable'
-              - 'dynamodb:DescribeTable'
-              - 'dynamodb:DescribeTimeToLive'
-              - 'dynamodb:UpdateTimeToLive'
-              - 'dynamodb:TagResource'
-              - 'dynamodb:UntagResource'
-              - 'dynamodb:ListTagsOfResource'
+            Action: 'dynamodb:*'
             Resource: '*'
           
           - Sid: ECRAccess
             Effect: Allow
-            Action:
-              - 'ecr:GetAuthorizationToken'
-              - 'ecr:BatchCheckLayerAvailability'
-              - 'ecr:GetDownloadUrlForLayer'
-              - 'ecr:BatchGetImage'
-              - 'ecr:PutImage'
-              - 'ecr:InitiateLayerUpload'
-              - 'ecr:UploadLayerPart'
-              - 'ecr:CompleteLayerUpload'
-              - 'ecr:CreateRepository'
-              - 'ecr:DeleteRepository'
-              - 'ecr:DescribeRepositories'
-              - 'ecr:PutLifecyclePolicy'
-              - 'ecr:GetRepositoryPolicy'
-              - 'ecr:SetRepositoryPolicy'
-              - 'ecr:InitiateLayerUpload'
+            Action: 'ecr:*'
             Resource: '*'
           
-          - Sid: SecretsManagerReadAccess
+          - Sid: SecretsAndParametersAccess
             Effect: Allow
             Action:
-              - 'secretsmanager:GetSecretValue'
-              - 'secretsmanager:DescribeSecret'
-            Resource: '*'
-          
-          - Sid: SSMParameterReadAccess
-            Effect: Allow
-            Action:
-              - 'ssm:GetParameter'
-              - 'ssm:GetParameters'
-              - 'ssm:GetParametersByPath'
+              - 'secretsmanager:*'
+              - 'ssm:*'
             Resource: '*'
           
           - Sid: STSAccess
             Effect: Allow
-            Action:
-              - 'sts:*'
-            Resource: '*'
-
-          - Sid: SSMParameterWriteAccess
-            Effect: Allow
-            Action:
-              - 'ssm:PutParameter'
-              - 'ssm:AddTagsToResource'
-            Resource: '*'
-
-          - Sid: WAFV2Access
-            Effect: Allow
-            Action:
-              - 'wafv2:*'
+            Action: 'sts:*'
             Resource: '*'
           
-          - Sid: CognitoUserPoolAccess
+          - Sid: WAFAccess
             Effect: Allow
-            Action:
-              - 'cognito-idp:CreateUserPool'
-              - 'cognito-idp:DeleteUserPool'
-              - 'cognito-idp:DescribeUserPool'
-              - 'cognito-idp:UpdateUserPool'
-              - 'cognito-idp:CreateUserPoolClient'
-              - 'cognito-idp:DeleteUserPoolClient'
-              - 'cognito-idp:DescribeUserPoolClient'
-              - 'cognito-idp:UpdateUserPoolClient'
-              - 'cognito-idp:CreateUserPoolDomain'
-              - 'cognito-idp:DeleteUserPoolDomain'
-              - 'cognito-idp:DescribeUserPoolDomain'
-              - 'cognito-idp:UpdateUserPoolDomain'
-              - 'cognito-idp:CreateResourceServer'
-              - 'cognito-idp:DeleteResourceServer'
-              - 'cognito-idp:DescribeResourceServer'
-              - 'cognito-idp:UpdateResourceServer'
-              - 'cognito-idp:SetUserPoolMfaConfig'
-              - 'cognito-idp:GetUserPoolMfaConfig'
-              - 'cognito-idp:TagResource'
-              - 'cognito-idp:UntagResource'
-              - 'cognito-idp:ListTagsForResource'
-              - 'cognito-idp:ListUserPools'
-              - 'cognito-idp:ListUserPoolClients'
-              - 'cognito-idp:CreateGroup'
-              - 'cognito-idp:DeleteGroup'
-              - 'cognito-idp:GetGroup'
-              - 'cognito-idp:UpdateGroup'
-              - 'cognito-idp:ListGroups'
+            Action: 'wafv2:*'
             Resource: '*'
           
-          - Sid: CognitoIdentityPoolAccess
+          - Sid: CognitoAccess
             Effect: Allow
             Action:
-              - 'cognito-identity:CreateIdentityPool'
-              - 'cognito-identity:DeleteIdentityPool'
-              - 'cognito-identity:DescribeIdentityPool'
-              - 'cognito-identity:UpdateIdentityPool'
-              - 'cognito-identity:SetIdentityPoolRoles'
-              - 'cognito-identity:GetIdentityPoolRoles'
-              - 'cognito-identity:TagResource'
-              - 'cognito-identity:UntagResource'
-              - 'cognito-identity:ListIdentityPools'
+              - 'cognito-idp:*'
+              - 'cognito-identity:*'
             Resource: '*'
 
   GitHubActionsRole:
@@ -305,17 +164,6 @@ Resources:
                 'token.actions.githubusercontent.com:sub': 
                   - !Sub 'repo:${GitHubOrg}/${GitHubRepo}:ref:refs/heads/main'
                   - !Sub 'repo:${GitHubOrg}/${GitHubRepo}:environment:dev'
-
       ManagedPolicyArns:
         - !Ref GitHubActionsSAMPolicy
-
-Outputs:
-  RoleArn:
-    Description: ARN of the GitHub Actions role
-    Value: !GetAtt GitHubActionsRole.Arn
-    Export:
-      Name: GitHubActionsRoleArn
-  
-  PolicyArn:
-    Description: ARN of the SAM deployment policy
-    Value: !Ref GitHubActionsSAMPolicy
+        - !Ref GitHubActionsAWSServicesPolicy
