@@ -17,7 +17,7 @@ Resources:
     Type: AWS::IAM::ManagedPolicy
     Properties:
       ManagedPolicyName: GitHubActionsSAMDeployPolicy
-      Description: Policy for GitHub Actions to deploy SAM applications
+      Description: Policy for GitHub Actions to depldespotoy SAM applications
       PolicyDocument:
         Version: '2012-10-17'
         Statement:
@@ -107,6 +107,13 @@ Resources:
               - 'apigateway:PUT'
               - 'apigateway:PATCH'
               - 'apigateway:DELETE'
+            Resource: '*'
+
+          - Sid: APIGatewayV2Access
+            Effect: Allow
+            Action:
+              - 'apigateway:*'
+              - 'apigatewayv2:*'
             Resource: '*'
           
           - Sid: EventBridgeAccess
@@ -223,6 +230,53 @@ Resources:
             Action:
               - 'ssm:PutParameter'
               - 'ssm:AddTagsToResource'
+            Resource: '*'
+          
+          - Sid: CognitoUserPoolAccess
+            Effect: Allow
+            Action:
+              - 'cognito-idp:CreateUserPool'
+              - 'cognito-idp:DeleteUserPool'
+              - 'cognito-idp:DescribeUserPool'
+              - 'cognito-idp:UpdateUserPool'
+              - 'cognito-idp:CreateUserPoolClient'
+              - 'cognito-idp:DeleteUserPoolClient'
+              - 'cognito-idp:DescribeUserPoolClient'
+              - 'cognito-idp:UpdateUserPoolClient'
+              - 'cognito-idp:CreateUserPoolDomain'
+              - 'cognito-idp:DeleteUserPoolDomain'
+              - 'cognito-idp:DescribeUserPoolDomain'
+              - 'cognito-idp:UpdateUserPoolDomain'
+              - 'cognito-idp:CreateResourceServer'
+              - 'cognito-idp:DeleteResourceServer'
+              - 'cognito-idp:DescribeResourceServer'
+              - 'cognito-idp:UpdateResourceServer'
+              - 'cognito-idp:SetUserPoolMfaConfig'
+              - 'cognito-idp:GetUserPoolMfaConfig'
+              - 'cognito-idp:TagResource'
+              - 'cognito-idp:UntagResource'
+              - 'cognito-idp:ListTagsForResource'
+              - 'cognito-idp:ListUserPools'
+              - 'cognito-idp:ListUserPoolClients'
+              - 'cognito-idp:CreateGroup'
+              - 'cognito-idp:DeleteGroup'
+              - 'cognito-idp:GetGroup'
+              - 'cognito-idp:UpdateGroup'
+              - 'cognito-idp:ListGroups'
+            Resource: '*'
+          
+          - Sid: CognitoIdentityPoolAccess
+            Effect: Allow
+            Action:
+              - 'cognito-identity:CreateIdentityPool'
+              - 'cognito-identity:DeleteIdentityPool'
+              - 'cognito-identity:DescribeIdentityPool'
+              - 'cognito-identity:UpdateIdentityPool'
+              - 'cognito-identity:SetIdentityPoolRoles'
+              - 'cognito-identity:GetIdentityPoolRoles'
+              - 'cognito-identity:TagResource'
+              - 'cognito-identity:UntagResource'
+              - 'cognito-identity:ListIdentityPools'
             Resource: '*'
 
   GitHubActionsRole:
