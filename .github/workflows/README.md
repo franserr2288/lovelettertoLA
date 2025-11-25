@@ -1,0 +1,1 @@
+consolidate workflows into a reuseable template for everything that sits under /iac (ie everything but deploy-microservices.yml), a lot of it is just copy+paste. low priority 
