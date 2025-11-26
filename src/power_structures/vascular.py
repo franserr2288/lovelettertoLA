@@ -3,6 +3,3 @@ class PortOperatorsAndLogistics:
 
 class ProfessionalLobbyingFirms:
     pass
-
-class LosAngelesNeighborhoodCouncils:
-    pass
