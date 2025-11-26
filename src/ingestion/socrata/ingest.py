@@ -4,6 +4,7 @@ import awswrangler as wr
 import pandas as pd
 import traceback
 from helper import setup_logger
+import datetime as dt
 
 logger = setup_logger(__name__)
 
@@ -15,6 +16,8 @@ def handler(event, context):
         dataset_name = body["DATASET_NAME"]
         dataset_resource_id = body["DATASET_RESOURCE_ID"]
         format = body["FORMAT"]
+
+        today_str = dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%d")
 
 
         url = construct_url_for_full_dataset_json(dataset_resource_id)
@@ -30,12 +33,18 @@ def handler(event, context):
         bucket_name = os.environ["BUCKET_NAME"]
 
         
-        if format == "CSV":
-            path = f"s3://{bucket_name}/{dataset_name}/raw/data.csv"
-            wr.s3.to_csv(df=data_frame, path=path, index=False)
-        elif format == "PARQUET":
-            parquet_path = f"s3://{bucket_name}/{dataset_name}/parquet/"
-            wr.s3.to_parquet(df=data_frame, dataset=True, path=parquet_path, max_rows_by_file=100000)
+        # if format == "CSV":
+        #     path = f"s3://{bucket_name}/{dataset_name}/raw/ingestion_date={today_str}/data.csv"
+        #     wr.s3.to_csv(df=data_frame, path=path, index=False)
+        if format == "PARQUET":
+            parquet_path = f"s3://{bucket_name}/{dataset_name}/raw/ingestion_date={today_str}"
+            wr.s3.to_parquet(
+                df=data_frame, 
+                dataset=True, 
+                path=parquet_path, 
+                mode="overwrite",
+                compression="snappy"
+            )
         else:
             logger.error("Invalid input, only supporting CSV or PARQUET")
             raise ValueError
