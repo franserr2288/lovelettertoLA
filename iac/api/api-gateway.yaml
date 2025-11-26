@@ -122,7 +122,7 @@ Resources:
           Priority: 1
           Statement:
             RateBasedStatement:
-              Limit: 1500  # 1500 r/5min for an IP
+              Limit: 300  # 300 r/5min for an IP
               AggregateKeyType: IP
           Action:
             Block: {}

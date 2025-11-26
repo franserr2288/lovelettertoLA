@@ -1,0 +1,67 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Event Ledger Components
+
+Resources:
+  EventQuery:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: get_event.handler
+      Runtime: python3.12
+      CodeUri: .
+      MemorySize: 256
+      Role: "{{resolve:ssm:/ingestion/lambda-role}}"
+      Environment:
+        Variables:
+          BUCKET_NAME: "{{resolve:ssm:/shared/data-bucket-name}}"
+      Events:
+        CognitoAuth:
+          Type: Api
+          Properties:
+            Path: /events
+            Method: get
+            RestApiId: "{{resolve:ssm:/shared/api/gateway-id}}"
+            Auth:
+              Authorizer: CognitoAuthorizer
+        
+        ApiKeyAuth:
+          Type: Api
+          Properties:
+            Path: /events-api
+            Method: get
+            RestApiId: "{{resolve:ssm:/shared/api/gateway-id}}"
+            Auth:
+              ApiKeyRequired: true
+              Authorizer: NONE
+  
+  EventCommand:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: create_event.handler
+      Runtime: python3.12
+      MemorySize: 512
+      Role: "{{resolve:ssm:/ingestion/lambda-role}}"
+      Environment:
+        Variables:
+          BUCKET_NAME: "{{resolve:ssm:/shared/data-bucket-name}}"
+      CodeUri: .
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /events
+            Method: post
+            RestApiId: "{{resolve:ssm:/shared/api/gateway-id}}"
+            Auth:
+              ApiKeyRequired: true
+              Authorizer: NONE
+            
+
+              
+
+
+
+  
+    
+
+      
