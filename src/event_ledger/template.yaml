@@ -98,7 +98,7 @@ Resources:
     Properties:
       Handler: get_event.handler
       Runtime: python3.12
-      CodeUri: .
+      CodeUri: ./query
       MemorySize: 256
       Role: "{{resolve:ssm:/ingestion/lambda-role}}"
       Environment:
@@ -134,7 +134,7 @@ Resources:
       Environment:
         Variables:
           BUCKET_NAME: "{{resolve:ssm:/shared/data-bucket-name}}"
-      CodeUri: .
+      CodeUri: ./command
       Events:
         ApiEvent:
           Type: Api
