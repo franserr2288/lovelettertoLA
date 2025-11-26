@@ -141,7 +141,7 @@ Resources:
           Properties:
             Path: /events
             Method: post
-            RestApiId: "{{resolve:ssm:/shared/api/gateway-id}}"
+            RestApiId: !Ref ApiGateway
             Auth:
               ApiKeyRequired: true
               Authorizer: NONE
