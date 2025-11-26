@@ -2,7 +2,6 @@ import boto3
 import requests, os, json
 import awswrangler as wr 
 import pandas as pd
-import traceback
 from helper import setup_logger
 import datetime as dt
 
@@ -13,60 +12,76 @@ def handler(event, context):
     try:
         # batch size 1
         body = json.loads(event["Records"][0]["body"])
+
         dataset_name: str = body["DATASET_NAME"]
-        dataset_resource_id = body["DATASET_RESOURCE_ID"]
         format = body["FORMAT"]
+        partition_col = body["partition_col"] # council_district_number for 311
+        dataset_resource_id = body["DATASET_RESOURCE_ID"]
+
 
         today_str = dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%d")
-
-
-        url = construct_url_for_full_dataset_json(dataset_resource_id)
-        headers = {
-            'Content-Type': 'application/json',
-            'X-App-Token': get_app_token(),
-        }
-
-        response = requests.get(url=url, headers=headers)
-        data = response.json()
-
-        data_frame = pd.DataFrame(data)
         bucket_name = os.environ["BUCKET_NAME"]
+        data_frame = get_data(dataset_resource_id)
+
+        if format not in ["CSV", "PARQUET"]:
+            raise ValueError
 
         
         if format == "CSV":
             path = f"s3://{bucket_name}/{dataset_name}/raw/ingestion_date={today_str}/data.csv"
             wr.s3.to_csv(df=data_frame, path=path, index=False)
-        elif format == "PARQUET":
+        else:
             path = f"s3://{bucket_name}/{dataset_name}/raw/ingestion_date={today_str}"
             wr.s3.to_parquet(
                 df=data_frame, 
                 dataset=True, 
                 path=path, 
                 mode="overwrite",
-                compression="snappy"
+                compression="snappy",
+                partition_cols=[partition_col] # break dataset up now to make it easy for downstream consumers
             )
-        else:
-            logger.error("Invalid input, only supporting CSV or PARQUET")
-            raise ValueError
-
-        # send sqs message to processor to begin
-        sqs_client = boto3.client("sqs")
-        response = sqs_client.get_queue_url(
-            QueueName=f"Socrata{dataset_name}ProcessingQueue"
-        )
-        queue_url = response["QueueUrl"]
-
-        sqs_client.send_message(
-            QueueUrl=queue_url,
-            MessageBody=json.dumps({"Path":path, "DATASET_NAME":dataset_name, "DATASET_RESOURCE_ID":dataset_resource_id, "FORMAT": format}),
-        )
-
-
+            kick_off_processing_layer(data_frame, path, partition_col, dataset_name, dataset_resource_id) 
     
     except Exception as e:
         logger.exception(f"Exception: {json.dumps(e)}")
         raise
 
+def kick_off_processing_layer(data_frame, path, partition_col, dataset_name, dataset_resource_id):
+    partition_values = data_frame[partition_col].unique().tolist()
+    sqs_client, queue_url = get_sqs_client_and_url(dataset_name)
+    for val in partition_values:
+        sqs_client.send_message(
+            QueueUrl=queue_url,
+            MessageBody=json.dumps({
+                "Path": f"{path}/{partition_col}={val}",
+                "DATASET_NAME": dataset_name,
+                "DATASET_RESOURCE_ID": dataset_resource_id,
+                "PARTITION_COL": partition_col,
+                "PARTITION_VALUE": val
+            }),
+        )   
+
+
+def get_data(dataset_resource_id):
+    url = construct_url_for_full_dataset_json(dataset_resource_id)
+    headers = {
+        'Content-Type': 'application/json',
+        'X-App-Token': get_app_token(),
+    }
+
+    response = requests.get(url=url, headers=headers)
+    data = response.json()
+
+    data_frame = pd.DataFrame(data)
+    return data_frame
+     
+def get_sqs_client_and_url(dataset_name):
+    sqs_client = boto3.client("sqs")
+    response = sqs_client.get_queue_url(
+        QueueName=f"Socrata{dataset_name}ProcessingQueue"
+    )
+    queue_url = response["QueueUrl"]
+    return sqs_client, queue_url
 
 def construct_url_for_full_dataset_json(dataset_resource_id):
     base_url = os.environ["BASE_URL"]
