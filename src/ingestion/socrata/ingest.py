@@ -13,7 +13,7 @@ def handler(event, context):
     try:
         # batch size 1
         body = json.loads(event["Records"][0]["body"])
-        dataset_name = body["DATASET_NAME"]
+        dataset_name: str = body["DATASET_NAME"]
         dataset_resource_id = body["DATASET_RESOURCE_ID"]
         format = body["FORMAT"]
 
@@ -33,21 +33,35 @@ def handler(event, context):
         bucket_name = os.environ["BUCKET_NAME"]
 
         
-        # if format == "CSV":
-        #     path = f"s3://{bucket_name}/{dataset_name}/raw/ingestion_date={today_str}/data.csv"
-        #     wr.s3.to_csv(df=data_frame, path=path, index=False)
-        if format == "PARQUET":
-            parquet_path = f"s3://{bucket_name}/{dataset_name}/raw/ingestion_date={today_str}"
+        if format == "CSV":
+            path = f"s3://{bucket_name}/{dataset_name}/raw/ingestion_date={today_str}/data.csv"
+            wr.s3.to_csv(df=data_frame, path=path, index=False)
+        elif format == "PARQUET":
+            path = f"s3://{bucket_name}/{dataset_name}/raw/ingestion_date={today_str}"
             wr.s3.to_parquet(
                 df=data_frame, 
                 dataset=True, 
-                path=parquet_path, 
+                path=path, 
                 mode="overwrite",
                 compression="snappy"
             )
         else:
             logger.error("Invalid input, only supporting CSV or PARQUET")
             raise ValueError
+
+        # send sqs message to processor to begin
+        sqs_client = boto3.client("sqs")
+        response = sqs_client.get_queue_url(
+            QueueName=f"Socrata{dataset_name}ProcessingQueue"
+        )
+        queue_url = response["QueueUrl"]
+
+        sqs_client.send_message(
+            QueueUrl=queue_url,
+            MessageBody=json.dumps({"Path":path}),
+        )
+
+
     
     except Exception as e:
         logger.exception(f"Exception: {json.dumps(e)}")
