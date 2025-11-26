@@ -79,7 +79,7 @@ Resources:
     Properties:
       Name: '/shared/acl-arn'
       Type: String
-      Value: !GetAtt WebACL.Arn
+      Value: !GetAtt ApiWebACL.Arn
 
   
 
