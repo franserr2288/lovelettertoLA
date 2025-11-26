@@ -2,24 +2,6 @@ AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: Deploy WAF
 
-Parameters:
-  Environment:
-    Type: String
-    Default: dev
-    AllowedValues:
-      - dev
-      - prod
-  
-  ThrottleRateLimit:
-    Type: Number
-    Default: 10
-    Description: Requests per second
-  
-  ThrottleBurstLimit:
-    Type: Number
-    Default: 20
-    Description: Max concurrent requests
-
 Resources: 
   ApiWebACL:
     Type: AWS::WAFv2::WebACL
