@@ -53,7 +53,7 @@ def kick_off_processing_layer(data_frame, path, partition_col, dataset_name, dat
         sqs_client.send_message(
             QueueUrl=queue_url,
             MessageBody=json.dumps({
-                "Path": f"{path}/{partition_col}={val}",
+                "PATH": f"{path}/{partition_col}={val}",
                 "DATASET_NAME": dataset_name,
                 "DATASET_RESOURCE_ID": dataset_resource_id,
                 "PARTITION_COL": partition_col,
