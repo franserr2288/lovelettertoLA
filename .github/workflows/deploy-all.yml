@@ -30,17 +30,17 @@ jobs:
 
 
     
-  deploy-gateway:
+  deploy-waf-cognito:
     secrets: inherit
     permissions:
       id-token: write
       contents: read
-    uses: ./.github/workflows/deploy-api-gateway-and-auth.yml
+    uses: ./.github/workflows/deploy-waf-and-auth.yml
     
   deploy-microservices:
     secrets: inherit
     permissions:
       id-token: write
       contents: read
-    needs: [deploy-registries, deploy-lambda-roles, deploy-storage, deploy-gateway]
+    needs: [deploy-registries, deploy-lambda-roles, deploy-storage, deploy-waf-cognito]
     uses: ./.github/workflows/deploy-microservices.yml

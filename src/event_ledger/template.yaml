@@ -3,6 +3,96 @@ Transform: AWS::Serverless-2016-10-31
 Description: Event Ledger Components
 
 Resources:
+  ApiGateway:
+    Type: AWS::Serverless::Api
+    # DependsOn:
+    #   - ApiAccessLogGroup
+    Properties:
+      StageName: !Ref Environment
+      EndpointConfiguration:
+        Type: REGIONAL
+      TracingEnabled: true
+      Auth:
+        DefaultAuthorizer: CognitoAuthorizer
+        Authorizers:
+          CognitoAuthorizer:
+            UserPoolArn: "{{resolve:ssm:/shared/cognito/user-pool-arn}}"
+            Identity:
+              Header: Authorization
+        ApiKeyRequired: false  # per-endpoint in app-component templates
+      MethodSettings:
+        - ResourcePath: '/*'
+          HttpMethod: '*'
+          ThrottlingRateLimit: !Ref ThrottleRateLimit
+          ThrottlingBurstLimit: !Ref ThrottleBurstLimit
+          # LoggingLevel: INFO
+          # DataTraceEnabled: true
+          MetricsEnabled: true
+      # AccessLogSetting:
+      #   DestinationArn: !GetAtt ApiAccessLogGroup.Arn
+      #   Format: '$context.requestId $context.extendedRequestId $context.identity.sourceIp $context.requestTime $context.httpMethod $context.routeKey $context.status $context.protocol $context.responseLength'
+      Tags:
+        Environment: !Ref Environment
+
+  # ApiAccessLogGroup:
+  #   Type: AWS::Logs::LogGroup
+  #   Properties:
+  #     LogGroupName: !Sub '/aws/apigateway/${AWS::StackName}-access-logs'
+  #     RetentionInDays: 30
+
+  ApiKey:
+    Type: AWS::ApiGateway::ApiKey
+    # DependsOn:
+    Properties:
+      Name: !Sub '${AWS::StackName}-api-key'
+      Description: API Key for protected endpoints
+      Enabled: true
+
+  # building in public, limit my exposure
+  UsagePlan:
+    Type: AWS::ApiGateway::UsagePlan
+    DependsOn:
+      - ApiGatewayStage
+    Properties:
+      UsagePlanName: !Sub '${AWS::StackName}-usage-plan'
+      Description: Usage plan with throttling and quota limits
+      ApiStages:
+        - ApiId: !Ref ApiGateway
+          Stage: !Ref Environment
+      Throttle:
+        RateLimit: !Ref ThrottleRateLimit
+        BurstLimit: !Ref ThrottleBurstLimit
+      Quota:
+        Limit: 5000  # 5k r/d
+        Period: DAY
+
+  # if key is leaked accidentally
+  UsagePlanKey:
+    Type: AWS::ApiGateway::UsagePlanKey
+    # DependsOn:
+    #   - ApiKey
+    #   - UsagePlan
+
+    Properties:
+      KeyId: !Ref ApiKey
+      KeyType: API_KEY
+      UsagePlanId: !Ref UsagePlan
+  
+  ApiWebACLAssociation:
+    Type: AWS::WAFv2::WebACLAssociation
+    DependsOn:
+      - ApiGatewayStage
+    Properties:
+      ResourceArn: !Sub 'arn:aws:apigateway:${AWS::Region}::/restapis/${ApiGateway}/stages/${Environment}'
+      WebACLArn:  "{{resolve:ssm:/shared/acl-arn}}"
+
+  ApiGatewayIdParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: /shared/api/gateway-id
+      Type: String
+      Value: !Ref ApiGateway
+  
   EventQuery:
     Type: AWS::Serverless::Function
     Properties:
@@ -20,7 +110,7 @@ Resources:
           Properties:
             Path: /events
             Method: get
-            RestApiId: "{{resolve:ssm:/shared/api/gateway-id}}"
+            RestApiId: !Ref ApiGateway
             Auth:
               Authorizer: CognitoAuthorizer
         
@@ -29,7 +119,7 @@ Resources:
           Properties:
             Path: /events-api
             Method: get
-            RestApiId: "{{resolve:ssm:/shared/api/gateway-id}}"
+            RestApiId: !Ref ApiGateway
             Auth:
               ApiKeyRequired: true
               Authorizer: NONE
