@@ -58,7 +58,7 @@ def handler(event, context):
 
         sqs_client.send_message(
             QueueUrl=queue_url,
-            MessageBody=json.dumps({"Path":path}),
+            MessageBody=json.dumps({"Path":path, "DATASET_NAME":dataset_name, "DATASET_RESOURCE_ID":dataset_resource_id, "FORMAT": format}),
         )
 
 

@@ -1,0 +1,42 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Ingestion Components
+
+Resources:
+  SocrataCity311ProcessingQueue-DLQ:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: SocrataCity311ProcessingQueue-DLQ
+  
+  SocrataCity311ProcessingQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: SocrataCity311ProcessingQueue
+
+      VisibilityTimeout: 900
+      RedrivePolicy:
+        deadLetterTargetArn: !GetAtt SocrataCity311ProcessingQueueDLQ.Arn
+        maxReceiveCount: 1
+
+  SocrataCity311Processing:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: process_city311.handler
+      CodeUri: ./city311
+      Runtime: python3.12
+      Role: "{{resolve:ssm:/ingestion/lambda-role}}"
+      MemorySize: 2048
+      Environment:
+        Variables:
+          BUCKET_NAME: "{{resolve:ssm:/shared/data-bucket-name}}"
+          # param it later
+          ENVIRONMENT: dev
+
+      Events:
+        SQSQueueEvent:
+          Type: SQS
+          Properties:
+            Queue: !GetAtt SocrataCity311ProcessingQueue.Arn
+            BatchSize: 1
+        
+              
