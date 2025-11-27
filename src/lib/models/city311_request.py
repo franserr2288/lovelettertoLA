@@ -2,16 +2,18 @@ from dataclasses import dataclass
 from datetime import date
 from typing import Optional
 
-
+# keys are capitalized differently in their api, using this more for documentation
+# not sure if i want another change to ingestion, to transform into a common model
 @dataclass
 class ServiceRequest:
     sr_number: str
     created_date: str
     request_type: str
     status: str
-    anonymous: bool
-    address_verified: bool
-    approximate_address: bool
+
+    anonymous: str # N = no, Y = yes
+    address_verified: str
+    approximate_address: str
     
     # timestamps
     updated_date: Optional[str] = None
@@ -37,7 +39,7 @@ class ServiceRequest:
     # geolocation
     latitude: Optional[float] = None
     longitude: Optional[float] = None
-    location: Optional[str] = None
+    location: Optional[dict] = None
     
     # thomas brothers map references AKA grid-wise location
     tbm_page: Optional[int] = None
