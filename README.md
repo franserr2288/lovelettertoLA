@@ -3,7 +3,7 @@ Dev Notes:
 
 architecture changes, going to break up datasets at ingestion layer instead of making a downstream processor do it or to filter or do request streaming. easier to handle now, will break it up by some partition column, in the case of city 311 i will use a council district number since zipcode cardinality = headache. now the only memory bottle neck will be the ingestion piece, if it can get past my ingestion then i have a guarantee it will get past the processing layer(s)
 
-Need to do more research to get an idea of where soft/hard power is in the city, I don't know the exact topology other than the obvious positions. Hopefully open data sources expose their info or I'll have to scrape them = brittle
+I have initial abstractions for stakeholders, but I need their personal info. need to see if it is exposed, otherwise i'll keep a json file that I update manually. ideally not
 
 
 cicd pipelines are stood up, only infra that is tightly coupled to whatever features i want will be necessary now. I don't want more shared infra, annoying to manage. 
@@ -20,3 +20,6 @@ Next steps:
 - Find more valueable datasets and test your ingestion subsystem against them 
 - Some datasets are split by year over different endpoints (city311), I don't know the extent of the differences in their columns/labels/values. I have faith in their engineers, but if it's a mess then you'll need a transformation component to get a coherent dataset across years. I would also need to figure out if or how I want to stitch that data on my own side of things... a lot of answers I have to chase down. Weigh potential value of historial analysis over years against lack of it, or effort of patchwork engineering at the processing/investigative phase to get that insight
 - If you find datasets where you hit your ceiling on the ingestion function, then you build a new version but don't waste time on it yet 
+
+
+https://myla311.lacity.gov/s/ the main page for the 311 data
