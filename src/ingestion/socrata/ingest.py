@@ -15,7 +15,7 @@ def handler(event, context):
 
         dataset_name: str = body["DATASET_NAME"]
         format = body["FORMAT"]
-        partition_col = body["partition_col"] # council_district_number for 311
+        partition_col = body["PARTITION_COL"] # council_district_number for 311
         dataset_resource_id = body["DATASET_RESOURCE_ID"]
 
 
