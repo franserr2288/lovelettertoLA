@@ -4,6 +4,9 @@ import json
 import datetime as dt
 import os
 
+from lib.shared.utils.paths.data_paths import get_aggregate_snapshot_path
+from lib.shared.utils.time.time_utils import get_today_str
+
 
 def handler(event, context):    
     try:
@@ -103,14 +106,11 @@ def perform_cross_district_rollup(df: pd.DataFrame, partition_col: str) -> dict:
 
 def write_final_rollups(df: pd.DataFrame, dataset_name: str):
     bucket_name = os.environ["BUCKET_NAME"]
-    today_utc_date_obj = dt.datetime.now(dt.timezone.utc).date()
-    today_str = today_utc_date_obj.strftime("%Y-%m-%d")
-    
-    output_path = f"s3://{bucket_name}/{dataset_name}/final_rollups/daily/analysis_date={today_str}/"
+    today_str = get_today_str()
     
     wr.s3.to_parquet(
         df=df,
-        path=output_path,
+        path=get_aggregate_snapshot_path(bucket_name, dataset_name, today_str),
         dataset=True,
         mode="append",
     )

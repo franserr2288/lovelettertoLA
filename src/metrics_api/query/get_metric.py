@@ -1,33 +1,72 @@
 from datetime import datetime
-import json
 import os
-from typing import List, Optional
+from typing import  Optional
 import boto3
 from fastapi import FastAPI, HTTPException, Query
 from mangum import Mangum
-from pydantic import BaseModel
+
+from lib.shared.utils.paths.data_paths import get_partition_snapshot_path, get_aggregate_snapshot_path
+from lib.shared.utils.time.time_utils import get_today_str
+from metrics_api.config.config import DATASETS
 
 app = FastAPI()
 s3 = boto3.client('s3')
 BUCKET_NAME = os.environ["BUCKET_NAME"]
 
-class EventCreate(BaseModel):
-    event_type: str
-    data: dict
+@app.get("/datasets")
+def list_datasets():
+    return {
+        "datasets": [
+            {
+                "name": k,
+                "partitioned_by": v["partition_by"],
+                "description": v["description"]
+            }
+            for k, v in DATASETS.items()
+        ]
+    }
 
-# @app.get("/metrics/{event_id}")
-# async def get_single_event(
-#     event_id: str,
-#     date: str = Query(..., pattern=r'^\d{4}-\d{2}-\d{2}$'),
-#     event_type: str = Query(...)
-# ):
-#     key = f"events/{date}/{event_type}/{event_id}"
+@app.get("/datasets/{dataset_name}/snapshots/{partition_value}")
+def get_partition_snapshot(
+    dataset_name: str,
+    partition_value: str,
+    date: Optional[str] = Query(None, description="Analysis date (YYYY-MM-DD), defaults to today")
+):
+    if dataset_name not in DATASETS:
+        raise HTTPException(404, f"Dataset '{dataset_name}' not found")
     
-#     try:
-#         response = s3.get_object(Bucket=BUCKET_NAME, Key=key)
-#         return {'item': json.loads(response['Body'].read())}
-#     except s3.exceptions.NoSuchKey:
-#         raise HTTPException(status_code=404, detail="Not found")
+    today_str = get_today_str()
+    partition_col = DATASETS[dataset_name]["partition_by"]
+
+    path = get_partition_snapshot_path()
+    # read from s3
+    
+    return {
+        "dataset": dataset_name,
+        "date": today_str,
+        "partition": {
+            "type": partition_col,
+            "value": partition_value
+        },
+    }
+
+@app.get("/datasets/{dataset_name}/summary")
+def get_aggregate_snapshot(
+    dataset_name: str,
+    date: Optional[str] = Query(None, description="Analysis date (YYYY-MM-DD), defaults to today")
+):
+    if dataset_name not in DATASETS:
+        raise HTTPException(404, f"Dataset '{dataset_name}' not found")
+    
+    today_str = get_today_str()
+    path = get_aggregate_snapshot_path()
+    # read from s3
+    
+    return {
+        "dataset": dataset_name,
+        "date": today_str,
+        "description": "Aggregated summary across all partitions"
+    }
 
 
 handler = Mangum(app, lifespan="off")

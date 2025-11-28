@@ -11,10 +11,6 @@ app = FastAPI()
 s3 = boto3.client('s3')
 BUCKET_NAME = os.environ["BUCKET_NAME"]
 
-class EventCreate(BaseModel):
-    event_type: str
-    data: dict
-
 @app.get("/events/{event_id}")
 async def get_single_event(
     event_id: str,

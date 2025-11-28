@@ -5,8 +5,9 @@ import awswrangler as wr
 import pandas as pd
 import traceback
 import datetime as dt
-from datetime import datetime, timezone
-
+from datetime import timezone
+from lib.shared.utils.paths.data_paths import get_partition_snapshots_root_path
+from lib.shared.utils.time.time_utils import get_today_str
 # TODO: geospatial analysis with the location data they give
 
 def handler(event, context):
@@ -18,9 +19,8 @@ def handler(event, context):
         dataset_name: str = body["DATASET_NAME"]
         partition_col = body["PARTITION_COL"]
 
-        today_utc_date_obj = dt.datetime.now(timezone.utc).date()
-        today_str = today_utc_date_obj.strftime("%Y-%m-%d")
-        output_path = f"s3://{bucket_name}/{dataset_name}/snapshot_analysis/analysis_date={today_str}/"        
+        today_str = get_today_str()
+        output_path =  get_partition_snapshots_root_path()
         
         if format != "PARQUET" or dataset_name != "City311":
             raise ValueError("Unsupported format or dataset.")

@@ -4,6 +4,7 @@ import pandas as pd
 from lib.shared.messages.sqs import get_sqs_client_and_url
 from lib.shared.secrets.ssm import get_secret_from_ssm
 from lib.shared.utils.logging.logger import setup_logger
+from lib.shared.utils.paths.data_paths import get_ingestion_path
 from lib.shared.utils.time.time_utils import get_today_str, get_time_stamp
 
 logger = setup_logger(__name__)
@@ -26,11 +27,11 @@ def handler(event, context):
         if format == "CSV":
             wr.s3.to_csv(
                 df=data_frame, 
-                path=construct_s3_path_for_ingestion(format,BUCKET_NAME, dataset_name, get_today_str()), 
+                path=get_ingestion_path(format,BUCKET_NAME, dataset_name, get_today_str()), 
                 index=False
             )
         else:
-            path = construct_s3_path_for_ingestion(format, BUCKET_NAME, dataset_name, get_today_str())
+            path = get_ingestion_path(format, BUCKET_NAME, dataset_name, get_today_str())
             wr.s3.to_parquet(
                 df=data_frame, 
                 dataset=True, 
@@ -85,12 +86,6 @@ def get_data(dataset_resource_id):
 
     data_frame = pd.DataFrame(data)
     return data_frame
-
-def construct_s3_path_for_ingestion(format, bucket_name, dataset_name, today_str):
-    if format == "CSV":
-        return f"s3://{bucket_name}/{dataset_name}/raw/ingestion_date={today_str}/data.csv"
-    else:
-        return f"s3://{bucket_name}/{dataset_name}/raw/ingestion_date={today_str}"
 
 def construct_url_for_full_dataset_json(dataset_resource_id):
     base_url = os.environ["BASE_URL"]
