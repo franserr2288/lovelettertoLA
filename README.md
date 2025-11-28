@@ -1,7 +1,7 @@
-
 Dev Notes: 
+another architecture change, after ingestion I was fanning out all the partitions into the next processing layer in order to kick off the layer. the fan out and the processing was not an issue until I had to fan-in the workloads, I had no way of knowing if all jobs working in parallel were finished unless i swapped to step functions (want to avoid.. clunky)  or unless in introduced more infra with a centralized counter that can wait for all of the other messages to get there. I don't have a need for parallelism right now, so instead the ingestion message will kick off a single message that will hold all the ids of the jobs i need it to do, each invocation will pop one off then requeue work. this is a recursive sqs pattern, was going to use this pattern to ingest if i had to change the consumption pattern. 
 
-architecture changes, going to break up datasets at ingestion layer instead of making a downstream processor do it or to filter or do request streaming. easier to handle now, will break it up by some partition column, in the case of city 311 i will use a council district number since zipcode cardinality = headache. now the only memory bottle neck will be the ingestion piece, if it can get past my ingestion then i have a guarantee it will get past the processing layer(s)
+previous architecture changes, going to break up datasets at ingestion layer instead of making a downstream processor do it or to filter or do request streaming. easier to handle now, will break it up by some partition column, in the case of city 311 i will use a council district number since zipcode cardinality = headache. now the only memory bottle neck will be the ingestion piece, if it can get past my ingestion then i have a guarantee it will get past the processing layer(s)
 
 I have initial abstractions for stakeholders, but I need their personal info. need to see if it is exposed, otherwise i'll keep a json file that I update manually. ideally not
 

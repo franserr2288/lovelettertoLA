@@ -7,6 +7,7 @@ import traceback
 import datetime as dt
 from datetime import datetime, timezone
 
+# TODO: geospatial analysis with the location data they give
 
 def handler(event, context):
     try:
@@ -15,17 +16,19 @@ def handler(event, context):
         body = json.loads(event["Records"][0]["body"])
         format = body["FORMAT"]
         dataset_name: str = body["DATASET_NAME"]
-        partition_val = body["PARTITION_VALUE"]
         partition_col = body["PARTITION_COL"]
 
+        today_utc_date_obj = dt.datetime.now(timezone.utc).date()
+        today_str = today_utc_date_obj.strftime("%Y-%m-%d")
+        output_path = f"s3://{bucket_name}/{dataset_name}/snapshot_analysis/analysis_date={today_str}/"        
+        
         if format != "PARQUET" or dataset_name != "City311":
             raise ValueError("Unsupported format or dataset.")
         
         path = body["PATH"]
-        df = wr.s3.read_parquet(path=path)
+        partition_val = body["PARTITION_VALUE"]
 
-        today_utc_date_obj = dt.datetime.now(timezone.utc).date()
-        today_str = today_utc_date_obj.strftime("%Y-%m-%d")
+        df = wr.s3.read_parquet(path=path)
 
         snapshot_metrics = run_analysis(
             dataset_name, 
@@ -33,22 +36,19 @@ def handler(event, context):
             partition_val, 
             today_str 
         )
+        snapshot_metrics["analysis_date"] = today_str
 
-      
-        output_path = f"s3://{bucket_name}/{dataset_name}/snapshot_analysis/"
         metrics_df = pd.DataFrame([snapshot_metrics])
         wr.s3.to_parquet(
             df=metrics_df,
             path=output_path,
             dataset=True,
             mode="overwrite",
-            partition_cols=[partition_col, "analysis_date"],
+            partition_cols=[partition_col],
         )
-
     except Exception as e:
         print(f"An error occurred in handler: {e}")
         print(traceback.format_exc())
-        raise
 
 
 def run_analysis(dataset_name, df, partition_val, today_str):
@@ -96,9 +96,9 @@ def run_city_311_analysis(df, partition_val, today_str):
         "total_records_closed_today": total_records_closed_today,
         "median_days_to_close_today": median_days_to_close_today,
         
-        "active_count_by_type": active_request_count_by_request_type.to_json(),
-        "active_count_by_owner": active_request_count_by_owner.to_json(),
-        "action_taken_distribution_today": action_taken_distribution_today.to_json(),
-        "source_channel_distribution_7d": source_channel_distribution.to_json(),
+        "active_count_by_type": active_request_count_by_request_type.to_dict(),
+        "active_count_by_owner": active_request_count_by_owner.to_dict(),
+        "action_taken_distribution_today": action_taken_distribution_today.to_dict(),
+        "source_channel_distribution_7d": source_channel_distribution.to_dict(),
     }
     return snapshot_metrics

@@ -3,26 +3,27 @@ Transform: AWS::Serverless-2016-10-31
 Description: Ingestion Components
 
 Resources:
-  SocrataCity311ProcessingQueue-DLQ:
+  # SNAPSHOT
+  SocrataSnapshotGenerator-DLQ:
       Type: AWS::SQS::Queue
       Properties:
-        QueueName: SocrataCity311ProcessingQueue-DLQ
+        QueueName: SocrataSnapshotGenerator-DLQ
   
-  SocrataCity311ProcessingQueue:
+  SocrataSnapshotGeneratorQueue:
     Type: AWS::SQS::Queue
     Properties:
-      QueueName: SocrataCity311ProcessingQueue
+      QueueName: SocrataSnapshotGeneratorQueue
 
       VisibilityTimeout: 900
       RedrivePolicy:
-        deadLetterTargetArn: !GetAtt SocrataCity311ProcessingQueueDLQ.Arn
+        deadLetterTargetArn: !GetAtt SocrataSnapshotGeneratorDLQ.Arn
         maxReceiveCount: 1
 
-  SocrataCity311Processing:
+  SocrataSnapshotGenerator:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: process_city311.handler
-      CodeUri: ./city311
+      Handler: snapshot_generation.handler
+      CodeUri: ./socrata/snapshot
       Runtime: python3.12
       Role: "{{resolve:ssm:/ingestion/lambda-role}}"
       MemorySize: 2048
@@ -36,7 +37,84 @@ Resources:
         SQSQueueEvent:
           Type: SQS
           Properties:
-            Queue: !GetAtt SocrataCity311ProcessingQueue.Arn
+            Queue: !GetAtt SocrataSnapshotGeneratorQueue.Arn
             BatchSize: 1
+
+  # SNAPSHOT ROLLUP
+  SocrataSnapshotRollUpQueue-DLQ:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: SocrataSnapshotGenerator-DLQ
+  
+  SocrataSnapshotRollUpQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: SocrataSnapshotRollUpQueue
+
+      VisibilityTimeout: 900
+      RedrivePolicy:
+        deadLetterTargetArn: !GetAtt SocrataSnapshotRollUpQueue-DLQ.Arn
+        maxReceiveCount: 1
+
+  SocrataSnapshotRollUp: 
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: snapshot_rollup.handler
+      CodeUri: ./socrata/partition_aggregate
+      Runtime: python3.12
+      Role: "{{resolve:ssm:/ingestion/lambda-role}}"
+      MemorySize: 2048
+      Environment:
+        Variables:
+          BUCKET_NAME: "{{resolve:ssm:/shared/data-bucket-name}}"
+          # param it later
+          ENVIRONMENT: dev
+
+      Events:
+        SQSQueueEvent:
+          Type: SQS
+          Properties:
+            Queue: !GetAtt SocrataSnapshotRollUpQueue.Arn
+            BatchSize: 1
+
+  # ORCHESTRATOR
+  SocrataProcessingOrchestrator-DLQ:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: SocrataProcessingOrchestrator-DLQ
+  
+  SocrataProcessingOrchestrator:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: SocrataProcessingOrchestrator
+
+      VisibilityTimeout: 900
+      RedrivePolicy:
+        deadLetterTargetArn: !GetAtt SocrataProcessingOrchestrator-DLQ.Arn
+        maxReceiveCount: 1
+
+  SocrataSnapshotGenerator:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: fan_in.handler
+      CodeUri: ./orchestrator
+      Runtime: python3.12
+      Role: "{{resolve:ssm:/ingestion/lambda-role}}"
+      MemorySize: 2048
+      Environment:
+        Variables:
+          BUCKET_NAME: "{{resolve:ssm:/shared/data-bucket-name}}"
+          # param it later
+          ENVIRONMENT: dev
+
+      Events:
+        SQSQueueEvent:
+          Type: SQS
+          Properties:
+            Queue: !GetAtt SocrataProcessingOrchestrator.Arn
+            BatchSize: 1
+
+  
+
         
               

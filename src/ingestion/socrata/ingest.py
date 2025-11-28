@@ -7,6 +7,8 @@ import datetime as dt
 
 logger = setup_logger(__name__)
 
+
+
 def handler(event, context):
     logger.info(f"Event: {json.dumps(event)}")
     try:
@@ -48,7 +50,7 @@ def handler(event, context):
 
 def kick_off_processing_layer(data_frame, path, partition_col, dataset_name, dataset_resource_id):
     partition_values = data_frame[partition_col].unique().tolist()
-    sqs_client, queue_url = get_sqs_client_and_url(dataset_name)
+    sqs_client, queue_url = get_client_and_url_for_processing_queue(dataset_name)
     for val in partition_values:
         sqs_client.send_message(
             QueueUrl=queue_url,
@@ -59,7 +61,21 @@ def kick_off_processing_layer(data_frame, path, partition_col, dataset_name, dat
                 "PARTITION_COL": partition_col,
                 "PARTITION_VALUE": val
             }),
-        )   
+        )  
+    # kick off processor/orchestrator
+    orchestrator_queue_url = get_client_and_url_for_orchestrator_queue(sqs_client)
+    sqs_client.send_message(
+        QueueUrl=orchestrator_queue_url,
+        MessageBody=json.dumps({
+            "TASK_TYPE": "POLLER",
+            "DATASET_NAME": dataset_name,
+            "PARTITION_COL": partition_col,
+            "OUTPUT_PATH": path,
+            "EXPECTED_COUNT": len(partition_values),
+            "START_TIME": dt.now(dt.timezone.utc).timestamp()
+        }),
+    )  
+     
 
 
 def get_data(dataset_resource_id):
@@ -75,13 +91,20 @@ def get_data(dataset_resource_id):
     data_frame = pd.DataFrame(data)
     return data_frame
      
-def get_sqs_client_and_url(dataset_name):
+def get_client_and_url_for_processing_queue(dataset_name):
     sqs_client = boto3.client("sqs")
     response = sqs_client.get_queue_url(
         QueueName=f"Socrata{dataset_name}ProcessingQueue"
     )
     queue_url = response["QueueUrl"]
     return sqs_client, queue_url
+
+def get_client_and_url_for_orchestrator_queue(sqs_client):
+    response = sqs_client.get_queue_url(
+        QueueName=f"SocrataOrchestratorQueue"
+    )
+    queue_url = response["QueueUrl"]
+    return queue_url
 
 def construct_url_for_full_dataset_json(dataset_resource_id):
     base_url = os.environ["BASE_URL"]
