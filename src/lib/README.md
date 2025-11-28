@@ -1,1 +1,0 @@
-move shared code in here and create a local python package that you can reference in the requirements.txt files for the other deployments, don't need to do a full py release 

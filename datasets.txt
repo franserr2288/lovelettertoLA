@@ -1,0 +1,43 @@
+Street Tree Inventory 
+Energy & Water Efficiency 
+Eviction Notices 
+Foreclosure Properties 
+Parking Citations 
+Crime Data (2020-Present)
+
+
+# DISPLACEMENT
+building permits, affordable housing development 
+business registrations (new closed, and where)
+parking cittions (gentrification proxy)
+311 complaints (illegal construction, habitability)
+
+# public safety resource allocation 
+Crime Data (types, locations, times)
+Traffic Collisions (injuries, fatalities)
+311 requests (response times)
+Street lighting/infrastructure
+Police staffing data (if available)
+
+# code enforcement gap 
+Health Inspections (restaurants/markets)
+Building Permits + Inspections
+311 complaints (habitability, illegal construction)
+Eviction Notices
+Housing code violations (if available)
+
+# Street Tree Inventory (700k trees with condition data)
+Building Permits (sidewalk, street work)
+311 requests (potholes, sidewalks, street conditions)
+Traffic data/collisions
+Parking citations
+
+
+
+-----
+building permits: https://data.lacity.org/City-Infrastructure-Service-Requests/Building-Permits-Feb-15-Present/6q2s-9pnn/about_data
+business registrations: https://data.lacity.org/Administration-Finance/Business-Registration-by-Fiscal-Year/6qbs-9m8d/about_data  (light weightx)
+
+LA checkbook: https://controllerdata.lacity.org/Purchasing/Checkbook-L-A-Data/pggv-e4fn/about_data (large dataset, would forsure need batching)
+La parking citations: https://data.lacity.org/Transportation/Parking-Citations/4f5p-udkv/about_data (again, large dataset, would need batching)
+LA building and safety inspections: https://data.lacity.org/City-Infrastructure-Service-Requests/Building-and-Safety-Inspections/9w5z-rg2h/about_data ( another large dataset)

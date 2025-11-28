@@ -1,0 +1,15 @@
+data_ingestion -> "s3://{bucket_name}/{dataset_name}/raw/ingestion_date={today_str}" with parition col CD
+
+then snapshots are written by data_aggregator/socrata/snapshot/snapshot_generation
+f"s3://{bucket_name}/{dataset_name}/snapshot_analysis/analysis_date={today_str}/"
+
+then the rollups are put here: f"s3://{bucket_name}/{dataset_name}/final_rollups/daily/analysis_date={today_str}/"
+
+by data_aggregator/socrata/snapshot_aggregate/snapshot_rollup.py
+
+okay cool, the way that i am producing the time strings though, i need to consolidate that into a standalone package and do the set up in /lib
+
+
+
+the next thing though is that you need to set up /lib to be used 
+also you need to figure out what to do with the 

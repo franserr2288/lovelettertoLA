@@ -12,7 +12,6 @@ ENV/
 *.env
 .env.*
 !.env.example
-secrets/
 config.json
 credentials.json
 .aws-sam/
