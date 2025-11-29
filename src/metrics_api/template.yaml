@@ -1,0 +1,126 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Event Ledger Components
+
+Parameters:
+  Environment:
+    Type: String
+    Default: dev
+    AllowedValues:
+      - dev
+      - prod
+  
+  ThrottleRateLimit:
+    Type: Number
+    Default: 10
+    Description: Requests per second
+  
+  ThrottleBurstLimit:
+    Type: Number
+    Default: 20
+    Description: Max concurrent requests
+
+Resources:
+  MetricsApiGateway:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: !Ref Environment
+      EndpointConfiguration:
+        Type: REGIONAL
+      TracingEnabled: true
+      Auth:
+        DefaultAuthorizer: CognitoAuthorizer
+        Authorizers:
+          CognitoAuthorizer:
+            UserPoolArn: "{{resolve:ssm:/shared/cognito/user-pool-arn}}"
+            Identity:
+              Header: Authorization
+        ApiKeyRequired: false  # per-endpoint in app-component templates
+      MethodSettings:
+        - ResourcePath: '/*'
+          HttpMethod: '*'
+          ThrottlingRateLimit: !Ref ThrottleRateLimit
+          ThrottlingBurstLimit: !Ref ThrottleBurstLimit
+          MetricsEnabled: true
+      Tags:
+        Environment: !Ref Environment
+
+  ApiKey:
+    Type: AWS::MetricsApiGateway::ApiKey
+    Properties:
+      Name: !Sub '${AWS::StackName}-api-key'
+      Description: API Key for protected endpoints
+      Enabled: true
+
+  # building in public, limit my exposure
+  UsagePlan:
+    Type: AWS::MetricsApiGateway::UsagePlan
+    DependsOn:
+      - MetricsApiGatewayStage
+    Properties:
+      UsagePlanName: !Sub '${AWS::StackName}-usage-plan'
+      Description: Usage plan with throttling and quota limits
+      ApiStages:
+        - ApiId: !Ref MetricsApiGateway
+          Stage: !Ref Environment
+      Throttle:
+        RateLimit: !Ref ThrottleRateLimit
+        BurstLimit: !Ref ThrottleBurstLimit
+      Quota:
+        Limit: 5000  # 5k r/d
+        Period: DAY
+
+  # if key is leaked accidentally
+  UsagePlanKey:
+    Type: AWS::MetricsApiGateway::UsagePlanKey
+    Properties:
+      KeyId: !Ref ApiKey
+      KeyType: API_KEY
+      UsagePlanId: !Ref UsagePlan
+  
+  ApiWebACLAssociation:
+    Type: AWS::WAFv2::WebACLAssociation
+    DependsOn:
+      - MetricsApiGatewayStage
+    Properties:
+      ResourceArn: !Sub 'arn:aws:Metricsapigateway:${AWS::Region}::/restapis/${MetricsApiGateway}/stages/${Environment}'
+      WebACLArn:  "{{resolve:ssm:/shared/acl-arn}}"
+
+  MetricsApiGatewayIdParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: /shared/api/gateway-id
+      Type: String
+      Value: !Ref MetricsApiGateway
+  
+  MetricQuery:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: get_event.handler
+      Runtime: python3.12
+      CodeUri: ./query
+      MemorySize: 256
+      Role: "{{resolve:ssm:/ingestion/lambda-role}}"
+      Environment:
+        Variables:
+          BUCKET_NAME: "{{resolve:ssm:/shared/data-bucket-name}}"
+      Events:
+        CognitoAuth:
+          Type: Api
+          Properties:
+            Path: /metrics
+            Method: get
+            RestApiId: !Ref MetricsApiGateway
+            Auth:
+              Authorizer: CognitoAuthorizer
+        
+        ApiKeyAuth:
+          Type: Api
+          Properties:
+            Path: /metrics-api
+            Method: get
+            RestApiId: !Ref MetricsApiGateway
+            Auth:
+              ApiKeyRequired: true
+              Authorizer: NONE
+            

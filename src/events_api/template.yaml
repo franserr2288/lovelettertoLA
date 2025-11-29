@@ -43,24 +43,12 @@ Resources:
           HttpMethod: '*'
           ThrottlingRateLimit: !Ref ThrottleRateLimit
           ThrottlingBurstLimit: !Ref ThrottleBurstLimit
-          # LoggingLevel: INFO
-          # DataTraceEnabled: true
           MetricsEnabled: true
-      # AccessLogSetting:
-      #   DestinationArn: !GetAtt ApiAccessLogGroup.Arn
-      #   Format: '$context.requestId $context.extendedRequestId $context.identity.sourceIp $context.requestTime $context.httpMethod $context.routeKey $context.status $context.protocol $context.responseLength'
       Tags:
         Environment: !Ref Environment
 
-  # ApiAccessLogGroup:
-  #   Type: AWS::Logs::LogGroup
-  #   Properties:
-  #     LogGroupName: !Sub '/aws/apigateway/${AWS::StackName}-access-logs'
-  #     RetentionInDays: 30
-
   ApiKey:
     Type: AWS::ApiGateway::ApiKey
-    # DependsOn:
     Properties:
       Name: !Sub '${AWS::StackName}-api-key'
       Description: API Key for protected endpoints
@@ -87,10 +75,6 @@ Resources:
   # if key is leaked accidentally
   UsagePlanKey:
     Type: AWS::ApiGateway::UsagePlanKey
-    # DependsOn:
-    #   - ApiKey
-    #   - UsagePlan
-
     Properties:
       KeyId: !Ref ApiKey
       KeyType: API_KEY
