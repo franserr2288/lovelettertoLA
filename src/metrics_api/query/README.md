@@ -1,0 +1,1 @@
+opting for a more general api even if that means the ingestion pipeline implementation is leaking into this component, not ideal but it lets me avoid an endpoint explosion. think there were more options but was involved to implement

@@ -5,8 +5,12 @@ import boto3
 from fastapi import FastAPI, HTTPException, Query
 from mangum import Mangum
 
-from lib.shared.storage.s3 import read_json_from_s3
-from lib.shared.utils.paths.data_paths import get_partition_snapshot_path, get_dated_aggregate_snapshot_path
+from lib.shared.storage.s3 import find_and_read_snapshots, read_json_from_s3
+from lib.shared.utils.paths.data_paths import (
+    get_dated_aggregate_snapshot_json_file_path, 
+    get_dated_snapshot_root_path, 
+    get_partition_snapshot_json_file_path
+)
 from lib.shared.utils.time.time_utils import get_today_str
 from metrics_api.config.config import DATASETS
 
@@ -36,15 +40,22 @@ def get_partition_snapshot(
     if dataset_name not in DATASETS:
         raise HTTPException(404, f"Dataset '{dataset_name}' not found")
     
-    today_str = get_today_str()
+    if not date:
+        date = get_today_str()
+
     partition_col = DATASETS[dataset_name]["partition_by"]
 
-    path = get_partition_snapshot_path()
-    data = read_json_from_s3(BUCKET_NAME, path)
-    
+    if not partition_value:
+        path  = get_dated_snapshot_root_path(BUCKET_NAME, dataset_name, date)
+        data = find_and_read_snapshots(BUCKET_NAME, path)
+
+    else:
+        path = get_partition_snapshot_json_file_path(BUCKET_NAME, dataset_name, date, partition_col, partition_value)
+        data = read_json_from_s3(BUCKET_NAME, path)
+
     return {
         "dataset": dataset_name,
-        "date": today_str,
+        "date": date,
         "data": data,
         "partition": {
             "type": partition_col,
@@ -59,9 +70,11 @@ def get_aggregate_snapshot(
 ):
     if dataset_name not in DATASETS:
         raise HTTPException(404, f"Dataset '{dataset_name}' not found")
+    
     if not date:
         date = get_today_str()
-    path = get_dated_aggregate_snapshot_path()
+
+    path = get_dated_aggregate_snapshot_json_file_path(BUCKET_NAME, dataset_name, date)
     data = read_json_from_s3(BUCKET_NAME, path)
 
     

@@ -4,7 +4,7 @@ import json
 import datetime as dt
 import os
 
-from lib.shared.utils.paths.data_paths import get_dated_aggregate_snapshot_path, get_partition_snapshot_json_file_path
+from lib.shared.utils.paths.data_paths import get_dated_aggregate_snapshot_json_file_path, get_dated_aggregate_snapshot_path, get_partition_snapshot_json_file_path
 from lib.shared.utils.time.time_utils import get_today_str
 
 
@@ -110,7 +110,7 @@ def write_final_rollups(df: pd.DataFrame, dataset_name: str):
     
     wr.s3.to_json(
         df=df,
-        path=get_partition_snapshot_json_file_path(bucket_name, dataset_name, today_str),
+        path=get_dated_aggregate_snapshot_json_file_path(bucket_name, dataset_name, today_str),
         dataset=False,
     )
     wr.s3.to_parquet(

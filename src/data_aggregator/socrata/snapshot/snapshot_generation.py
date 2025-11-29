@@ -6,7 +6,7 @@ import pandas as pd
 import traceback
 import datetime as dt
 from datetime import timezone
-from lib.shared.utils.paths.data_paths import get_dated_snapshot_root_path
+from lib.shared.utils.paths.data_paths import get_dated_snapshot_root_path, get_partition_snapshot_json_file_path
 from lib.shared.utils.time.time_utils import get_today_str
 # TODO: geospatial analysis with the location data they give
 
@@ -18,10 +18,7 @@ def handler(event, context):
         format = body["FORMAT"]
         dataset_name: str = body["DATASET_NAME"]
         partition_col = body["PARTITION_COL"]
-
-        today_str = get_today_str()
-        output_path =  get_dated_snapshot_root_path()
-        
+                
         if format != "PARQUET" or dataset_name != "City311":
             raise ValueError("Unsupported format or dataset.")
         
@@ -29,6 +26,7 @@ def handler(event, context):
         partition_val = body["PARTITION_VALUE"]
 
         df = wr.s3.read_parquet(path=path)
+        today_str = get_today_str()
 
         snapshot_metrics = run_analysis(
             dataset_name, 
@@ -41,16 +39,14 @@ def handler(event, context):
         metrics_df = pd.DataFrame([snapshot_metrics])
         wr.s3.to_parquet(
             df=metrics_df,
-            path=output_path,
+            path=get_dated_snapshot_root_path(bucket_name, dataset_name, today_str),
             dataset=True,
             mode="overwrite",
             partition_cols=[partition_col],
         )
         wr.s3.to_json(
             df=metrics_df,
-            path=output_path,
-            dataset=True,
-            mode="overwrite",
+            path=get_partition_snapshot_json_file_path(bucket_name, dataset_name, today_str, partition_col, partition_val),
             partition_cols=[partition_col],
         )
     except Exception as e:
