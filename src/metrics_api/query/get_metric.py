@@ -5,7 +5,8 @@ import boto3
 from fastapi import FastAPI, HTTPException, Query
 from mangum import Mangum
 
-from lib.shared.utils.paths.data_paths import get_partition_snapshot_path, get_aggregate_snapshot_path
+from lib.shared.storage.s3 import read_json_from_s3
+from lib.shared.utils.paths.data_paths import get_partition_snapshot_path, get_dated_aggregate_snapshot_path
 from lib.shared.utils.time.time_utils import get_today_str
 from metrics_api.config.config import DATASETS
 
@@ -39,11 +40,12 @@ def get_partition_snapshot(
     partition_col = DATASETS[dataset_name]["partition_by"]
 
     path = get_partition_snapshot_path()
-    # read from s3
+    data = read_json_from_s3(BUCKET_NAME, path)
     
     return {
         "dataset": dataset_name,
         "date": today_str,
+        "data": data,
         "partition": {
             "type": partition_col,
             "value": partition_value
@@ -57,14 +59,16 @@ def get_aggregate_snapshot(
 ):
     if dataset_name not in DATASETS:
         raise HTTPException(404, f"Dataset '{dataset_name}' not found")
-    
-    today_str = get_today_str()
-    path = get_aggregate_snapshot_path()
-    # read from s3
+    if not date:
+        date = get_today_str()
+    path = get_dated_aggregate_snapshot_path()
+    data = read_json_from_s3(BUCKET_NAME, path)
+
     
     return {
         "dataset": dataset_name,
-        "date": today_str,
+        "date": date,
+        "data": data,
         "description": "Aggregated summary across all partitions"
     }
 

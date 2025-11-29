@@ -6,7 +6,7 @@ import pandas as pd
 import traceback
 import datetime as dt
 from datetime import timezone
-from lib.shared.utils.paths.data_paths import get_partition_snapshots_root_path
+from lib.shared.utils.paths.data_paths import get_dated_snapshot_root_path
 from lib.shared.utils.time.time_utils import get_today_str
 # TODO: geospatial analysis with the location data they give
 
@@ -20,7 +20,7 @@ def handler(event, context):
         partition_col = body["PARTITION_COL"]
 
         today_str = get_today_str()
-        output_path =  get_partition_snapshots_root_path()
+        output_path =  get_dated_snapshot_root_path()
         
         if format != "PARQUET" or dataset_name != "City311":
             raise ValueError("Unsupported format or dataset.")
@@ -40,6 +40,13 @@ def handler(event, context):
 
         metrics_df = pd.DataFrame([snapshot_metrics])
         wr.s3.to_parquet(
+            df=metrics_df,
+            path=output_path,
+            dataset=True,
+            mode="overwrite",
+            partition_cols=[partition_col],
+        )
+        wr.s3.to_json(
             df=metrics_df,
             path=output_path,
             dataset=True,
