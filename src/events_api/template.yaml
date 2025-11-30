@@ -91,7 +91,7 @@ Resources:
   ApiGatewayIdParameter:
     Type: AWS::SSM::Parameter
     Properties:
-      Name: /shared/api/gateway-id
+      Name: /shared/events_api/${Environment}/gateway-id
       Type: String
       Value: !Ref ApiGateway
   

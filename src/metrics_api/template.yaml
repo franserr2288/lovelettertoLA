@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: Event Ledger Components
+Description: Metrics API Components
 
 Parameters:
   Environment:
@@ -89,8 +89,8 @@ Resources:
   MetricsApiGatewayIdParameter:
     Type: AWS::SSM::Parameter
     Properties:
-      Name: /shared/api/gateway-id
-      Type: String
+      Name: /shared/metrics_api/${Environment}/gateway-id
+      Type: String 
       Value: !Ref MetricsApiGateway
   
   MetricQuery:
