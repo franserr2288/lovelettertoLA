@@ -46,7 +46,7 @@ Resources:
         Environment: !Ref Environment
 
   ApiKey:
-    Type: AWS::MetricsApiGateway::ApiKey
+    Type: AWS::ApiGateway::ApiKey
     Properties:
       Name: !Sub '${AWS::StackName}-api-key'
       Description: API Key for protected endpoints
@@ -54,7 +54,7 @@ Resources:
 
   # building in public, limit my exposure
   UsagePlan:
-    Type: AWS::MetricsApiGateway::UsagePlan
+    Type: AWS::ApiGateway::UsagePlan
     DependsOn:
       - MetricsApiGatewayStage
     Properties:
@@ -72,7 +72,7 @@ Resources:
 
   # if key is leaked accidentally
   UsagePlanKey:
-    Type: AWS::MetricsApiGateway::UsagePlanKey
+    Type: AWS::ApiGateway::UsagePlanKey
     Properties:
       KeyId: !Ref ApiKey
       KeyType: API_KEY
