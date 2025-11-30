@@ -1,11 +1,10 @@
 import awswrangler as wr 
 import pandas as pd
 import json
-import datetime as dt
 import os
 
-from lib.shared.utils.paths.data_paths import get_dated_aggregate_snapshot_json_file_path, get_dated_aggregate_snapshot_path, get_partition_snapshot_json_file_path
-from lib.shared.utils.time.time_utils import get_today_str
+from shared.utils.paths.data_paths import get_dated_aggregate_snapshot_json_file_path, get_dated_aggregate_snapshot_path, get_partition_snapshot_json_file_path
+from shared.utils.time.time_utils import get_today_str
 
 
 def handler(event, context):    

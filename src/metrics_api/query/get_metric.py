@@ -4,13 +4,13 @@ import boto3
 from fastapi import FastAPI, HTTPException, Query
 from mangum import Mangum
 
-from lib.shared.storage.s3 import find_and_read_snapshots, read_json_from_s3
-from lib.shared.utils.paths.data_paths import (
+from shared.storage.s3 import find_and_read_snapshots, read_json_from_s3
+from shared.utils.paths.data_paths import (
     get_dated_aggregate_snapshot_json_file_path, 
     get_dated_snapshot_root_path, 
     get_partition_snapshot_json_file_path
 )
-from lib.shared.utils.time.time_utils import get_today_str
+from shared.utils.time.time_utils import get_today_str
 from metrics_api.config.config import DATASETS
 
 app = FastAPI()

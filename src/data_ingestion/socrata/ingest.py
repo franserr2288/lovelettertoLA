@@ -1,11 +1,11 @@
 import requests, os, json
 import awswrangler as wr 
 import pandas as pd
-from lib.shared.messages.sqs import get_sqs_client_and_url
-from lib.shared.secrets.ssm import get_secret_from_ssm
-from lib.shared.utils.logging.logger import setup_logger
-from lib.shared.utils.paths.data_paths import get_ingestion_path
-from lib.shared.utils.time.time_utils import get_today_str, get_time_stamp
+from shared.messages.sqs import get_sqs_client_and_url
+from shared.secrets.ssm import get_secret_from_ssm
+from shared.utils.logging.logger import setup_logger
+from shared.utils.paths.data_paths import get_ingestion_path
+from shared.utils.time.time_utils import get_today_str, get_time_stamp
 
 logger = setup_logger(__name__)
 BUCKET_NAME = os.environ["BUCKET_NAME"]

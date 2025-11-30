@@ -1,13 +1,11 @@
-import boto3
-import pytz
-import requests, os, json
+import os, json
 import awswrangler as wr 
 import pandas as pd
 import traceback
 import datetime as dt
 from datetime import timezone
-from lib.shared.utils.paths.data_paths import get_dated_snapshot_root_path, get_partition_snapshot_json_file_path
-from lib.shared.utils.time.time_utils import get_today_str
+from shared.utils.paths.data_paths import get_dated_snapshot_root_path, get_partition_snapshot_json_file_path
+from shared.utils.time.time_utils import get_today_str
 # TODO: geospatial analysis with the location data they give
 
 def handler(event, context):

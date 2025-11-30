@@ -4,8 +4,8 @@ import boto3
 from fastapi import FastAPI, HTTPException, Query
 from mangum import Mangum
 
-from lib.shared.storage.s3 import read_json_from_s3
-from lib.shared.utils.paths.data_paths import get_all_events_path, get_event_id_path
+from shared.storage.s3 import read_json_from_s3
+from shared.utils.paths.data_paths import get_all_events_path, get_event_id_path
 
 app = FastAPI()
 s3 = boto3.client('s3')
