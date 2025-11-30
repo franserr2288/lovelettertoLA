@@ -6,12 +6,12 @@ on:
     branches: [main]
 
 jobs:
-  deploy-registries:
-    secrets: inherit
-    permissions:
-      id-token: write
-      contents: read
-    uses: ./.github/workflows/deploy-ecr.yml
+  # deploy-registries:
+  #   secrets: inherit
+  #   permissions:
+  #     id-token: write
+  #     contents: read
+  #   uses: ./.github/workflows/deploy-ecr.yml
     
   deploy-storage:
     secrets: inherit
@@ -40,5 +40,6 @@ jobs:
     permissions:
       id-token: write
       contents: read
-    needs: [deploy-registries, deploy-lambda-roles, deploy-storage, deploy-waf-cognito]
+    # needs: [deploy-registries, deploy-lambda-roles, deploy-storage, deploy-waf-cognito]
+    needs: [deploy-lambda-roles, deploy-storage, deploy-waf-cognito]
     uses: ./.github/workflows/deploy-microservices.yml
