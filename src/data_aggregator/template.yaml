@@ -100,7 +100,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: snapshot_rollup.handler
-      CodeUri: ./socrata/partition_aggregate
+      CodeUri: ./socrata/snapshot_aggregate
       Runtime: python3.12
       Role: "{{resolve:ssm:/ingestion/lambda-role}}"
       MemorySize: 2048
