@@ -26,31 +26,55 @@ Resources:
       Value: !Ref SocrataIngestionQueue
       Description: URL for the processing queue
 
+  # Ingestion:
+  #   Type: AWS::Serverless::Function
+  #   Properties:
+  #     PackageType: Image
+  #     MemorySize: 3008
+  #     Timeout: 900
+  #     Role: "{{resolve:ssm:/ingestion/lambda-role}}"
+  #     Environment:
+  #       Variables:
+  #         BASE_URL: "https://data.lacity.org"
+  #         SOCRATA_TOKEN_PARAM_NAME: /ingestion/SOCRATA_APP_TOKEN
+  #         BUCKET_NAME: "{{resolve:ssm:/shared/data-bucket-name}}"
+  #         # param it later
+  #         ENVIRONMENT: dev
+
+  #     Events:
+  #       SQSQueueEvent:
+  #         Type: SQS
+  #         Properties:
+  #           Queue: !GetAtt SocrataIngestionQueue.Arn
+  #           BatchSize: 1
+  #   Metadata:
+  #     DockerTag: python3.12-v2
+  #     DockerContext: socrata/
+  #     Dockerfile: Dockerfile
+
   Ingestion:
     Type: AWS::Serverless::Function
     Properties:
-      PackageType: Image
+      Runtime: python3.12
+      CodeUri: socrata/
+      Handler: ingest.handler 
       MemorySize: 3008
       Timeout: 900
       Role: "{{resolve:ssm:/ingestion/lambda-role}}"
+      Layers:
+        - !Sub arn:aws:lambda:${AWS::Region}:336392948345:layer:AWSSDKPandas-Python312:13
       Environment:
         Variables:
           BASE_URL: "https://data.lacity.org"
           SOCRATA_TOKEN_PARAM_NAME: /ingestion/SOCRATA_APP_TOKEN
           BUCKET_NAME: "{{resolve:ssm:/shared/data-bucket-name}}"
-          # param it later
           ENVIRONMENT: dev
-
       Events:
         SQSQueueEvent:
           Type: SQS
           Properties:
             Queue: !GetAtt SocrataIngestionQueue.Arn
             BatchSize: 1
-    Metadata:
-      DockerTag: python3.12-v2
-      DockerContext: socrata/
-      Dockerfile: Dockerfile
 
   DatasetIngestionOrchestrator:
     Type: AWS::Serverless::Function
