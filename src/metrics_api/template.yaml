@@ -74,9 +74,9 @@ Resources:
   MetricsUsagePlanKey:
     Type: AWS::ApiGateway::UsagePlanKey
     Properties:
-      KeyId: !Ref ApiKey
+      KeyId: !Ref MetricsApiKey
       KeyType: API_KEY
-      UsagePlanId: !Ref UsagePlan
+      UsagePlanId: !Ref MetricsUsagePlan
   
   ApiWebACLAssociation:
     Type: AWS::WAFv2::WebACLAssociation
