@@ -89,7 +89,7 @@ Resources:
   MetricsApiGatewayIdParameter:
     Type: AWS::SSM::Parameter
     Properties:
-      Name: /shared/metrics_api/${Environment}/gateway-id
+      Name: !Sub '/shared/metrics_api/${Environment}/gateway-id'
       Type: String 
       Value: !Ref MetricsApiGateway
   
