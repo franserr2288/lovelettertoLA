@@ -1,4 +1,3 @@
-from datetime import datetime
 import os
 from typing import  Optional
 import boto3

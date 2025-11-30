@@ -7,6 +7,9 @@ from fastapi import FastAPI, HTTPException, Query
 from mangum import Mangum
 from pydantic import BaseModel
 
+from lib.shared.storage.s3 import read_json_from_s3
+from lib.shared.utils.paths.data_paths import get_all_events_path, get_event_id_path
+
 app = FastAPI()
 s3 = boto3.client('s3')
 BUCKET_NAME = os.environ["BUCKET_NAME"]
@@ -17,11 +20,11 @@ async def get_single_event(
     date: str = Query(..., pattern=r'^\d{4}-\d{2}-\d{2}$'),
     event_type: str = Query(...)
 ):
-    key = f"events/{date}/{event_type}/{event_id}"
+    key = get_event_id_path(date, event_type, event_id)
     
     try:
-        response = s3.get_object(Bucket=BUCKET_NAME, Key=key)
-        return {'item': json.loads(response['Body'].read())}
+        data = read_json_from_s3(BUCKET_NAME, key, s3)
+        return {'item': data}
     except s3.exceptions.NoSuchKey:
         raise HTTPException(status_code=404, detail="Not found")
 
@@ -36,10 +39,10 @@ async def get_events_batch(keys: List[str]):
     
     for key in keys:
         try:
-            response = s3.get_object(Bucket=BUCKET_NAME, Key=key)
+            data = read_json_from_s3(BUCKET_NAME, key, s3)
             events.append({
                 'key': key,
-                'data': json.loads(response['Body'].read())
+                'data': data
             })
         except Exception as e:
             errors.append({'key': key, 'error': str(e)})
@@ -54,10 +57,8 @@ async def list_events(
     limit: int = Query(100, le=1000),
     continuation_token: Optional[str] = None
 ):
-    prefix = f"events/{date}/"
-    if event_type:
-        prefix += f"{event_type}/"
-    
+    prefix = get_all_events_path(date, event_type)
+
     s3_params = {
         'Bucket': BUCKET_NAME,
         'Prefix': prefix,

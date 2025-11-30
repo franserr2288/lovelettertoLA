@@ -22,3 +22,15 @@ def get_dated_aggregate_snapshot_json_file_path(bucket_name, dataset_name, date)
 
 def get_base_path(bucket_name, dataset_name):
     return f"s3://{bucket_name}/{dataset_name}"
+
+
+# events 
+def get_event_id_path(date, event_type, event_id):
+    return f"events/{date}/{event_type}/{event_id}"
+
+def get_all_events_path(date, event_type=None):
+    prefix = f"events/{date}/"
+    if event_type:
+        prefix += f"{event_type}/"
+    return prefix
+                      
