@@ -4,7 +4,7 @@ Description: Ingestion Components
 
 Resources:
   # SNAPSHOT
-  SocrataSnapshotGenerator-DLQ:
+  SocrataSnapshotGeneratorDLQ:
       Type: AWS::SQS::Queue
       Properties:
         QueueName: SocrataSnapshotGenerator-DLQ
@@ -61,7 +61,7 @@ Resources:
             BatchSize: 1
 
   # SNAPSHOT ROLLUP
-  SocrataSnapshotRollUpQueue-DLQ:
+  SocrataSnapshotRollUpQueueDLQ:
       Type: AWS::SQS::Queue
       Properties:
         QueueName: SocrataSnapshotGenerator-DLQ
@@ -73,7 +73,7 @@ Resources:
 
       VisibilityTimeout: 900
       RedrivePolicy:
-        deadLetterTargetArn: !GetAtt SocrataSnapshotRollUpQueue-DLQ.Arn
+        deadLetterTargetArn: !GetAtt SocrataSnapshotRollUpQueueDLQ.Arn
         maxReceiveCount: 1
 
   # SocrataSnapshotRollUp: 
@@ -118,7 +118,7 @@ Resources:
             BatchSize: 1
 
   # ORCHESTRATOR
-  SocrataProcessingOrchestrator-DLQ:
+  SocrataProcessingOrchestratorDLQ:
       Type: AWS::SQS::Queue
       Properties:
         QueueName: SocrataProcessingOrchestrator-DLQ
@@ -130,7 +130,7 @@ Resources:
 
       VisibilityTimeout: 900
       RedrivePolicy:
-        deadLetterTargetArn: !GetAtt SocrataProcessingOrchestrator-DLQ.Arn
+        deadLetterTargetArn: !GetAtt SocrataProcessingOrchestratorDLQ.Arn
         maxReceiveCount: 1
 
   ProcessorOrchestrator:
