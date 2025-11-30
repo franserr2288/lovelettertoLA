@@ -133,7 +133,7 @@ Resources:
         deadLetterTargetArn: !GetAtt SocrataProcessingOrchestrator-DLQ.Arn
         maxReceiveCount: 1
 
-  SocrataSnapshotGenerator:
+  ProcessorOrchestrator:
     Type: AWS::Serverless::Function
     Properties:
       Handler: fan_in.handler
@@ -141,6 +141,8 @@ Resources:
       Runtime: python3.12
       Role: "{{resolve:ssm:/ingestion/lambda-role}}"
       MemorySize: 2048
+      Layers:
+        - !Sub arn:aws:lambda:${AWS::Region}:336392948345:layer:AWSSDKPandas-Python312:13
       Environment:
         Variables:
           BUCKET_NAME: "{{resolve:ssm:/shared/data-bucket-name}}"

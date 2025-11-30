@@ -96,7 +96,7 @@ Resources:
   MetricQuery:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: get_event.handler
+      Handler: get_metric.handler
       Runtime: python3.12
       CodeUri: ./query
       MemorySize: 256
