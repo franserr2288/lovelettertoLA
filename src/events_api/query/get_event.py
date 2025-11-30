@@ -1,11 +1,8 @@
-from datetime import datetime
-import json
 import os
 from typing import List, Optional
 import boto3
 from fastapi import FastAPI, HTTPException, Query
 from mangum import Mangum
-from pydantic import BaseModel
 
 from lib.shared.storage.s3 import read_json_from_s3
 from lib.shared.utils.paths.data_paths import get_all_events_path, get_event_id_path
