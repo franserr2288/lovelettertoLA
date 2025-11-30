@@ -45,7 +45,7 @@ Resources:
       Tags:
         Environment: !Ref Environment
 
-  ApiKey:
+  MetricsApiKey:
     Type: AWS::ApiGateway::ApiKey
     Properties:
       Name: !Sub '${AWS::StackName}-api-key'
@@ -53,7 +53,7 @@ Resources:
       Enabled: true
 
   # building in public, limit my exposure
-  UsagePlan:
+  MetricsUsagePlan:
     Type: AWS::ApiGateway::UsagePlan
     DependsOn:
       - MetricsApiGatewayStage
@@ -71,7 +71,7 @@ Resources:
         Period: DAY
 
   # if key is leaked accidentally
-  UsagePlanKey:
+  MetricsUsagePlanKey:
     Type: AWS::ApiGateway::UsagePlanKey
     Properties:
       KeyId: !Ref ApiKey
