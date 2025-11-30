@@ -78,7 +78,7 @@ Resources:
       KeyType: API_KEY
       UsagePlanId: !Ref MetricsUsagePlan
   
-  ApiWebACLAssociation:
+  MetricsApiWebACLAssociation:
     Type: AWS::WAFv2::WebACLAssociation
     DependsOn:
       - MetricsApiGatewayStage
