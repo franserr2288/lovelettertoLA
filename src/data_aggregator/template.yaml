@@ -64,7 +64,7 @@ Resources:
   SocrataSnapshotRollUpQueueDLQ:
       Type: AWS::SQS::Queue
       Properties:
-        QueueName: SocrataSnapshotGenerator-DLQ
+        QueueName: SocrataSnapshotRollUpQueue-DLQ
   
   SocrataSnapshotRollUpQueue:
     Type: AWS::SQS::Queue
