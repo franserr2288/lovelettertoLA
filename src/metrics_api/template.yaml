@@ -83,7 +83,7 @@ Resources:
     DependsOn:
       - MetricsApiGatewayStage
     Properties:
-      ResourceArn: !Sub 'arn:aws:Metricsapigateway:${AWS::Region}::/restapis/${MetricsApiGateway}/stages/${Environment}'
+      ResourceArn: !Sub 'arn:aws:apigateway:${AWS::Region}::/restapis/${MetricsApiGateway}/stages/${Environment}'
       WebACLArn:  "{{resolve:ssm:/shared/acl-arn}}"
 
   MetricsApiGatewayIdParameter:
