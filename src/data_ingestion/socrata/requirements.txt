@@ -1,4 +1,0 @@
-awswrangler
-requests
-pandas
--e ../../lib

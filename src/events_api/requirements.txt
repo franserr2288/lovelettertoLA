@@ -1,4 +1,4 @@
 fastapi
 mangum
 pydantic
--e ../../lib
+-e ../lib
