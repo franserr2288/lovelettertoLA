@@ -1,38 +1,22 @@
 name: Deploy Lambda Layers
 on:
+  push:
+    branches: [ main ]
+    paths:
+        - "iac/layers/**"
   workflow_dispatch:
   workflow_call: 
 
+
 permissions:
-  id-token: write  
+  id-token: write   
   contents: read 
 
-jobs:
-  discover:
-    runs-on: ubuntu-latest
-    outputs:
-      matrix: ${{ steps.build-matrix.outputs.matrix }}
-    steps:
-      - uses: actions/checkout@v3
-      - id: build-matrix
-        run: |
-          MATRIX=$(find . -name 'template.yaml' -o -name 'template.yml' | while read template; do
-            dir=$(dirname "$template")
-            # Check .aws subdirectory first, then parent directory
-            if [ -f "$dir/.aws/regions.json" ]; then
-              regions=$(jq -c '.regions' "$dir/.aws/regions.json")
-            elif [ -f "$dir/regions.json" ]; then
-              regions=$(jq -c '.regions' "$dir/regions.json")
-            else
-              regions='["us-east-1"]'
-            fi
-            echo "$regions" | jq -c --arg tmpl "$template" '.[] | {template: $tmpl, region: .}'
-          done | jq -s -c '{include: .}')
-          echo "matrix=$MATRIX" >> $GITHUB_OUTPUT
+jobs:          
   deploy:
-    needs: discover
     strategy:
-      matrix: ${{ fromJson(needs.discover.outputs.matrix) }}
+      matrix: 
+        region: [us-east-1]
     runs-on: ubuntu-latest
     environment: dev
     steps:
