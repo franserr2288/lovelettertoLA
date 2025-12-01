@@ -13,7 +13,7 @@ def handler(event, context):
     expected_count = body["EXPECTED_COUNT"]
     start_time = body["START_TIME"]
     
-    elapsed_mins = (datetime.now(datetime.timezone.utc).timestamp() - start_time) / 60
+    elapsed_mins = (datetime.datetime.now(datetime.timezone.utc).timestamp() - start_time) / 60
     if elapsed_mins > MAX_POLL_DURATION_MINS:
         print(f"TIMEOUT: Batch took longer than {MAX_POLL_DURATION_MINS} mins. Stopping poller.")
         return
