@@ -24,26 +24,6 @@ Resources:
         deadLetterTargetArn: !GetAtt SocrataSnapshotGeneratorDLQ.Arn
         maxReceiveCount: 1
 
-  # SocrataSnapshotGenerator:
-  #   Type: AWS::Serverless::Function
-  #   Properties:
-  #     Handler: snapshot_generation.handler
-  #     CodeUri: ./socrata/snapshot
-  #     Runtime: python3.12
-  #     Role: "{{resolve:ssm:/ingestion/lambda-role}}"
-  #     MemorySize: 2048
-  #     Environment:
-  #       Variables:
-  #         BUCKET_NAME: "{{resolve:ssm:/shared/data-bucket-name}}"
-  #         # param it later
-  #         ENVIRONMENT: dev
-
-  #     Events:
-  #       SQSQueueEvent:
-  #         Type: SQS
-  #         Properties:
-  #           Queue: !GetAtt SocrataSnapshotGeneratorQueue.Arn
-  #           BatchSize: 1
   SocrataSnapshotGenerator:
     Type: AWS::Serverless::Function
     Properties:
@@ -81,26 +61,6 @@ Resources:
         deadLetterTargetArn: !GetAtt SocrataSnapshotRollUpQueueDLQ.Arn
         maxReceiveCount: 1
 
-  # SocrataSnapshotRollUp: 
-  #   Type: AWS::Serverless::Function
-  #   Properties:
-  #     Handler: snapshot_rollup.handler
-  #     CodeUri: ./socrata/partition_aggregate
-  #     Runtime: python3.12
-  #     Role: "{{resolve:ssm:/ingestion/lambda-role}}"
-  #     MemorySize: 2048
-  #     Environment:
-  #       Variables:
-  #         BUCKET_NAME: "{{resolve:ssm:/shared/data-bucket-name}}"
-  #         # param it later
-  #         ENVIRONMENT: dev
-
-  #     Events:
-  #       SQSQueueEvent:
-  #         Type: SQS
-  #         Properties:
-  #           Queue: !GetAtt SocrataSnapshotRollUpQueue.Arn
-  #           BatchSize: 1
   SocrataSnapshotRollUp: 
     Type: AWS::Serverless::Function
     Properties:
