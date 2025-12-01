@@ -7,7 +7,8 @@ import boto3
 POLL_DELAY_SECONDS = 60  # check S3 every minute
 MAX_POLL_DURATION_MINS = 60  # kill switch
 
-def handler(body):
+def handler(event, context):
+    body = json.loads(event["Records"][0]["body"])
     output_path = body["OUTPUT_PATH"]
     expected_count = body["EXPECTED_COUNT"]
     start_time = body["START_TIME"]

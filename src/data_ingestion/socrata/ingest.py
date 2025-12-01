@@ -40,13 +40,13 @@ def handler(event, context):
                 compression="snappy",
                 partition_cols=[partition_col]
             )
-            kick_off_processing_layer(data_frame, path, partition_col, dataset_name, dataset_resource_id) 
+            kick_off_processing_layer(data_frame, path, partition_col, dataset_name, dataset_resource_id, format) 
     
     except Exception as e:
         logger.exception(f"Exception: {e}")
         raise
 
-def kick_off_processing_layer(data_frame, path, partition_col, dataset_name, dataset_resource_id):
+def kick_off_processing_layer(data_frame, path, partition_col, dataset_name, dataset_resource_id, format):
     partition_values = data_frame[partition_col].unique().tolist()
     sqs_client, queue_url = get_client_and_url_for_processing_queue(dataset_name)
     for val in partition_values:
@@ -57,7 +57,8 @@ def kick_off_processing_layer(data_frame, path, partition_col, dataset_name, dat
                 "DATASET_NAME": dataset_name,
                 "DATASET_RESOURCE_ID": dataset_resource_id,
                 "PARTITION_COL": partition_col,
-                "PARTITION_VALUE": val
+                "PARTITION_VALUE": val,
+                "FORMAT": format
             }),
         )  
     orchestrator_queue_url = get_client_and_url_for_orchestrator_queue(sqs_client)
