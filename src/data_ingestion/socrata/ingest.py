@@ -43,7 +43,7 @@ def handler(event, context):
             kick_off_processing_layer(data_frame, path, partition_col, dataset_name, dataset_resource_id) 
     
     except Exception as e:
-        logger.exception(f"Exception: {json.dumps(e)}")
+        logger.exception(f"Exception: {e}")
         raise
 
 def kick_off_processing_layer(data_frame, path, partition_col, dataset_name, dataset_resource_id):
