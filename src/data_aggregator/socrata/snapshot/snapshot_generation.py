@@ -60,34 +60,34 @@ def run_analysis(dataset_name, df, partition_val, today_str):
 
 def run_city_311_analysis(df, partition_val, today_str):
     
-    date_cols = ['CreatedDate', 'UpdatedDate', 'ClosedDate', 'ServiceDate']
+    date_cols = ['createddate', 'updateddate', 'closeddate', 'servicedate']
     for col in date_cols:
         if col in df.columns and df[col].dtype == 'object':
             df[col] = pd.to_datetime(df[col], utc=True, errors='coerce')
     
     today_utc_date_obj = dt.datetime.strptime(today_str, "%Y-%m-%d").date()
 
-    active = ['Open', 'In-Progress', 'Pending']
-    active_df = df.loc[df['Status'].isin(active)]
+    active = ['open', 'In-Progress', 'pending']
+    active_df = df.loc[df['status'].isin(active)]
     total_active_request_count = active_df.shape[0]
 
-    active_request_count_by_request_type = active_df.groupby('RequestType').size()
-    active_request_count_by_owner = active_df.groupby('Owner').size()
+    active_request_count_by_request_type = active_df.groupby('requesttype').size()
+    active_request_count_by_owner = active_df.groupby('owner').size()
 
-    new_request_count = df.loc[df['CreatedDate'].dt.date == today_utc_date_obj].shape[0]
+    new_request_count = df.loc[df['createddate'].dt.date == today_utc_date_obj].shape[0]
 
-    closed_df = df.loc[df['ClosedDate'].dt.date == today_utc_date_obj].copy()
+    closed_df = df.loc[df['closeddate'].dt.date == today_utc_date_obj].copy()
     total_records_closed_today = closed_df.shape[0]
 
-    closed_df["DaysToClose"] = (closed_df["ClosedDate"] - closed_df["CreatedDate"]).dt.days
-    median_days_to_close_today = closed_df['DaysToClose'].median() if total_records_closed_today > 0 else 0
+    closed_df["daystoclose"] = (closed_df["closeddate"] - closed_df["createddate"]).dt.days
+    median_days_to_close_today = closed_df['daystoclose'].median() if total_records_closed_today > 0 else 0
 
 
     seven_days_ago_utc = dt.datetime.strptime(today_str, "%Y-%m-%d").replace(tzinfo=timezone.utc) - dt.timedelta(days=7)
-    recent_requests_df = df.loc[df['CreatedDate'] >= seven_days_ago_utc]
-    source_channel_distribution = recent_requests_df['RequestSource'].value_counts(normalize=True).head(5)
+    recent_requests_df = df.loc[df['createddate'] >= seven_days_ago_utc]
+    source_channel_distribution = recent_requests_df['requestsource'].value_counts(normalize=True).head(5)
 
-    action_taken_distribution_today = closed_df['ActionTaken'].value_counts()
+    action_taken_distribution_today = closed_df['actiontaken'].value_counts()
     
     snapshot_metrics = {
         "analysis_date": today_str,
