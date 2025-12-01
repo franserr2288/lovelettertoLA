@@ -1,0 +1,23 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+
+Resources:
+  SharedLibLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: shared-lib-layer
+      # code was copied to that location at root level
+      ContentUri: ../../build/layer
+      CompatibleRuntimes:
+        - python3.12
+        - python3.11 
+        - python3.10
+        - python3.9
+        - python3.8
+  SharedLayerArnParameter: 
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: /shared/lib_layer
+      Type: String
+      Description: The ARN of the Shared Library Lambda Layer.
+      Value: !Ref SharedLibLayer
