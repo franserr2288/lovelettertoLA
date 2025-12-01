@@ -1,0 +1,75 @@
+name: Deploy Lambda Layers
+on:
+  workflow_dispatch:
+  workflow_call: 
+
+permissions:
+  id-token: write  
+  contents: read 
+
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.build-matrix.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v3
+      - id: build-matrix
+        run: |
+          MATRIX=$(find . -name 'template.yaml' -o -name 'template.yml' | while read template; do
+            dir=$(dirname "$template")
+            # Check .aws subdirectory first, then parent directory
+            if [ -f "$dir/.aws/regions.json" ]; then
+              regions=$(jq -c '.regions' "$dir/.aws/regions.json")
+            elif [ -f "$dir/regions.json" ]; then
+              regions=$(jq -c '.regions' "$dir/regions.json")
+            else
+              regions='["us-east-1"]'
+            fi
+            echo "$regions" | jq -c --arg tmpl "$template" '.[] | {template: $tmpl, region: .}'
+          done | jq -s -c '{include: .}')
+          echo "matrix=$MATRIX" >> $GITHUB_OUTPUT
+  deploy:
+    needs: discover
+    strategy:
+      matrix: ${{ fromJson(needs.discover.outputs.matrix) }}
+    runs-on: ubuntu-latest
+    environment: dev
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install Dependencies with Apt Get
+        run: |
+          sudo apt-get update
+          sudo apt-get install python3.12 jq -y
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        
+        with:
+          role-to-assume: ${{ secrets.AWS_GITHUB_ACTIONS_ROLE_ARN }}
+          aws-region: ${{ matrix.region }}
+
+      - uses: aws-actions/setup-sam@v2
+      
+      - name: Get AWS Account ID
+        id: account
+        run: |
+          ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+          echo "::add-mask::$ACCOUNT_ID"
+          echo "account_id=$ACCOUNT_ID" >> $GITHUB_OUTPUT
+
+      - name: Prepare Lambda Layer for Shared Library
+        run: |
+          mkdir -p build/layer/python
+          cp -r src/lib/shared build/layer/python/
+
+      - name: Build/Deploy Lambda layer
+        working-directory: iac/layers
+        run: |
+          sam build --template shared.yaml
+          sam deploy \
+            --config-file samconfig.toml \
+            --image-repository ${{ steps.account.outputs.account_id }}.dkr.ecr.${{ matrix.region }}.amazonaws.com/${{ secrets.ECR_REPO_NAME }} \
+            --region ${{matrix.region}} \
+            --no-fail-on-empty-changeset 

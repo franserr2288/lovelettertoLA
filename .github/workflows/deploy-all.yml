@@ -20,6 +20,13 @@ jobs:
       contents: read
     uses: ./.github/workflows/deploy-storage.yml
 
+  deploy-lambda-layers:
+    secrets: inherit
+    permissions:
+      id-token: write
+      contents: read
+    uses: ./.github/workflows/deploy-lambda-layers.yml
+
   deploy-waf-cognito:
     secrets: inherit
     permissions:
@@ -41,5 +48,5 @@ jobs:
       id-token: write
       contents: read
     # needs: [deploy-registries, deploy-lambda-roles, deploy-storage, deploy-waf-cognito]
-    needs: [deploy-lambda-roles, deploy-storage, deploy-waf-cognito]
+    needs: [deploy-lambda-roles, deploy-storage, deploy-waf-cognito, deploy-lambda-layers]
     uses: ./.github/workflows/deploy-microservices.yml
