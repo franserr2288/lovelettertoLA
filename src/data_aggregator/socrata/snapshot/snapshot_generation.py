@@ -4,11 +4,15 @@ import pandas as pd
 import traceback
 import datetime as dt
 from datetime import timezone
+from shared.utils.logging.logger import setup_logger
 from shared.utils.paths.data_paths import get_dated_snapshot_root_path, get_partition_snapshot_json_file_path
 from shared.utils.time.time_utils import get_today_str
 # TODO: geospatial analysis with the location data they give
+logger = setup_logger(__name__)
 
 def handler(event, context):
+    logger.info(f"Event: {json.dumps(event)}")
+
     try:
         bucket_name = os.environ["BUCKET_NAME"]
         
@@ -97,9 +101,9 @@ def run_city_311_analysis(df, partition_val, today_str):
         "total_records_closed_today": total_records_closed_today,
         "median_days_to_close_today": median_days_to_close_today,
         
-        "active_count_by_type": active_request_count_by_request_type.to_dict(),
-        "active_count_by_owner": active_request_count_by_owner.to_dict(),
-        "action_taken_distribution_today": action_taken_distribution_today.to_dict(),
-        "source_channel_distribution_7d": source_channel_distribution.to_dict(),
+        "active_count_by_type": active_request_count_by_request_type.to_records(),
+        "active_count_by_owner": active_request_count_by_owner.to_records(),
+        "action_taken_distribution_today": action_taken_distribution_today.to_records(),
+        "source_channel_distribution_7d": source_channel_distribution.to_records(),
     }
     return snapshot_metrics
