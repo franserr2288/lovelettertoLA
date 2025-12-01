@@ -62,7 +62,7 @@ def run_city_311_analysis(df, partition_val, today_str):
     
     date_cols = ['createddate', 'updateddate', 'closeddate', 'servicedate']
     for col in date_cols:
-        if col in df.columns and df[col].dtype == 'object':
+        if col in df.columns and (df[col].dtype == 'object' or df[col].dtype=="string"):
             df[col] = pd.to_datetime(df[col], utc=True, errors='coerce')
     
     today_utc_date_obj = dt.datetime.strptime(today_str, "%Y-%m-%d").date()
