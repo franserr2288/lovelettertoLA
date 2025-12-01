@@ -90,12 +90,13 @@ def get_data(dataset_resource_id):
 def construct_url_for_full_dataset_json(dataset_resource_id):
     base_url = os.environ["BASE_URL"]
     return base_url + "/api/v3/views/" + dataset_resource_id + "/query.json"
-     
+
+#TODO: change queue names in template and here to better reflect their purpose
 def get_client_and_url_for_processing_queue(dataset_name):
-    return get_sqs_client_and_url(f"Socrata{dataset_name}ProcessingQueue")
+    return get_sqs_client_and_url(f"SocrataSnapshotRollUpQueue")
 
 def get_client_and_url_for_orchestrator_queue(sqs_client):
-    _, queue_url = get_sqs_client_and_url("SocrataOrchestratorQueue")
+    _, queue_url = get_sqs_client_and_url("SocrataProcessingQueue")
     return queue_url
 
 def get_app_token():

@@ -37,7 +37,8 @@ def requeue_poller(body):
 
 def kick_off_next_processing_layer(dataset_name, partition_col, output_path):
     sqs = boto3.client("sqs")
-    queue_url = get_queue_url(sqs, "SocrateSnapshotAggregateQueue")
+    # TODO alter queue names later
+    queue_url = get_queue_url(sqs, "SocrataSnapshotRollUpQueue")
     
     sqs.send_message(
         QueueUrl=queue_url,
