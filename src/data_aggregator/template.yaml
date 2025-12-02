@@ -31,7 +31,7 @@ Resources:
       CodeUri: ./socrata/snapshot
       Runtime: python3.12
       Role: "{{resolve:ssm:/ingestion/lambda-role}}"
-      MemorySize: 2048
+      MemorySize: 1024
       Layers:
         - !Sub arn:aws:lambda:${AWS::Region}:336392948345:layer:AWSSDKPandas-Python312:13
       Environment:
@@ -68,7 +68,7 @@ Resources:
       CodeUri: ./socrata/snapshot_aggregate
       Runtime: python3.12
       Role: "{{resolve:ssm:/ingestion/lambda-role}}"
-      MemorySize: 2048
+      MemorySize: 1024
       Layers:
         - !Sub arn:aws:lambda:${AWS::Region}:336392948345:layer:AWSSDKPandas-Python312:13
       Environment:
@@ -105,7 +105,7 @@ Resources:
       CodeUri: ./orchestrator
       Runtime: python3.12
       Role: "{{resolve:ssm:/ingestion/lambda-role}}"
-      MemorySize: 2048
+      MemorySize: 512
       Layers:
         - !Sub arn:aws:lambda:${AWS::Region}:336392948345:layer:AWSSDKPandas-Python312:13
       Environment:
