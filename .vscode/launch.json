@@ -9,8 +9,12 @@
         "console": "integratedTerminal",
         "cwd": "${fileDirname}",
         "env": {
-          "AWS_PROFILE": "local-dev"
-        }
+          "AWS_PROFILE": "local-dev",
+          // resolve imports -> mimic layer
+          "PYTHONPATH": "${workspaceFolder}/src/lib"
+        },
+        // load in env file to avoid code changes
+        "envFile": "${workspaceFolder}/.env"
     }
   ]
 }
