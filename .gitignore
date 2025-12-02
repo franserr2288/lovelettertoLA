@@ -17,3 +17,4 @@ credentials.json
 .aws-sam/
 .python-version
 secrets.sh
+local-dev.py

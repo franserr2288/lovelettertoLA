@@ -5,7 +5,7 @@ import traceback
 import datetime as dt
 from datetime import timezone
 from shared.utils.logging.logger import setup_logger
-from shared.utils.paths.data_paths import get_dated_snapshot_root_path, get_partition_snapshot_json_file_path
+from shared.utils.paths.data_paths import get_dated_snapshot_root_path, get_partition_snapshot_json_file_path, get_partition_snapshot_path
 from shared.utils.time.time_utils import get_today_str
 # TODO: geospatial analysis with the location data they give
 logger = setup_logger(__name__)
@@ -41,15 +41,13 @@ def handler(event, context):
         metrics_df = pd.DataFrame([snapshot_metrics])
         wr.s3.to_parquet(
             df=metrics_df,
-            path=get_dated_snapshot_root_path(bucket_name, dataset_name, today_str),
+            path=get_partition_snapshot_path(bucket_name, dataset_name, today_str, partition_col, partition_val),
             dataset=True,
             mode="overwrite",
-            partition_cols=[partition_col],
         )
         wr.s3.to_json(
             df=metrics_df,
             path=get_partition_snapshot_json_file_path(bucket_name, dataset_name, today_str, partition_col, partition_val),
-            partition_cols=[partition_col],
         )
     except Exception as e:
         print(f"An error occurred in handler: {e}")
@@ -101,9 +99,9 @@ def run_city_311_analysis(df, partition_val, today_str):
         "total_records_closed_today": total_records_closed_today,
         "median_days_to_close_today": median_days_to_close_today,
         
-        "active_count_by_type": active_request_count_by_request_type.to_records(),
-        "active_count_by_owner": active_request_count_by_owner.to_records(),
-        "action_taken_distribution_today": action_taken_distribution_today.to_records(),
-        "source_channel_distribution_7d": source_channel_distribution.to_records(),
+        "active_count_by_type": active_request_count_by_request_type.to_dict() if active_request_count_by_request_type.size > 0 else {"is_empty":True},
+        "active_count_by_owner": active_request_count_by_owner.to_dict() if active_request_count_by_owner.size > 0 else {"is_empty":True},
+        "action_taken_distribution_today": action_taken_distribution_today.to_dict() if action_taken_distribution_today.size > 0 else {"is_empty":True},
+        "source_channel_distribution_7d": source_channel_distribution.to_dict() if source_channel_distribution.size > 0 else {"is_empty":True},
     }
     return snapshot_metrics
