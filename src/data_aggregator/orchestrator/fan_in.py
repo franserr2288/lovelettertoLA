@@ -3,11 +3,18 @@ import json
 import os
 import awswrangler as wr
 import boto3
+from shared.utils.logging.logger import setup_logger
+
+logger = setup_logger(__name__)
+
+
 
 POLL_DELAY_SECONDS = 60  # check S3 every minute
 MAX_POLL_DURATION_MINS = 60  # kill switch
 
 def handler(event, context):
+    logger.info(f"Event: {json.dumps(event)}")
+
     body = json.loads(event["Records"][0]["body"])
     output_path = body["OUTPUT_PATH"]
     expected_count = body["EXPECTED_COUNT"]

@@ -111,6 +111,7 @@ Resources:
       Environment:
         Variables:
           BUCKET_NAME: "{{resolve:ssm:/shared/data-bucket-name}}"
+          SQS_QUEUE_NAME: !Ref SocrataProcessingOrchestrator.QueueName
           # param it later
           ENVIRONMENT: dev
 
