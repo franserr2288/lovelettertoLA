@@ -4,11 +4,13 @@ import pandas as pd
 from shared.messages.sqs import get_sqs_client_and_url
 from shared.secrets.ssm import get_secret_from_ssm
 from shared.utils.logging.logger import setup_logger
-from shared.utils.paths.data_paths import get_ingestion_path
+from shared.utils.paths.data_paths import get_dated_snapshot_root_path, get_ingestion_path, get_partition_snapshot_path
 from shared.utils.time.time_utils import get_today_str, get_time_stamp
 
 logger = setup_logger(__name__)
 BUCKET_NAME = os.environ["BUCKET_NAME"]
+
+#TODO: configure it so that processing pipeline can do old workloads instead of just the current day
 
 def handler(event, context):
     logger.info(f"Event: {json.dumps(event)}")
@@ -53,7 +55,7 @@ def kick_off_processing_layer(data_frame, path, partition_col, dataset_name, dat
         sqs_client.send_message(
             QueueUrl=queue_url,
             MessageBody=json.dumps({
-                "PATH": f"{path}/{partition_col}={val}",
+                "INGESTION_PATH": f"{path}/{partition_col}={val}",
                 "DATASET_NAME": dataset_name,
                 "DATASET_RESOURCE_ID": dataset_resource_id,
                 "PARTITION_COL": partition_col,
@@ -68,7 +70,7 @@ def kick_off_processing_layer(data_frame, path, partition_col, dataset_name, dat
             "TASK_TYPE": "POLLER",
             "DATASET_NAME": dataset_name,
             "PARTITION_COL": partition_col,
-            "OUTPUT_PATH": path,
+            "ANALYSIS_PATH": get_dated_snapshot_root_path(BUCKET_NAME, dataset_name, get_today_str()),
             "EXPECTED_COUNT": len(partition_values),
             "START_TIME": get_time_stamp()
         }),

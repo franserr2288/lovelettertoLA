@@ -24,10 +24,10 @@ def handler(event, context):
         if format != "PARQUET" or dataset_name != "City311":
             raise ValueError("Unsupported format or dataset.")
         
-        path = body["PATH"]
+        ingestion_path = body["INGESTION_PATH"]
         partition_val = body["PARTITION_VALUE"]
 
-        df = wr.s3.read_parquet(path=path)
+        df = wr.s3.read_parquet(path=ingestion_path)
         today_str = get_today_str()
 
         snapshot_metrics = run_analysis(

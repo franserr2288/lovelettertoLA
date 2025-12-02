@@ -110,7 +110,6 @@ def write_final_rollups(df: pd.DataFrame, dataset_name: str):
     wr.s3.to_json(
         df=df,
         path=get_dated_aggregate_snapshot_json_file_path(bucket_name, dataset_name, today_str),
-        dataset=False,
     )
     wr.s3.to_parquet(
         df=df,

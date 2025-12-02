@@ -16,7 +16,7 @@ def handler(event, context):
     logger.info(f"Event: {json.dumps(event)}")
 
     body = json.loads(event["Records"][0]["body"])
-    output_path = body["OUTPUT_PATH"]
+    analysis_path = body["ANALYSIS_PATH"]
     expected_count = body["EXPECTED_COUNT"]
     start_time = body["START_TIME"]
     
@@ -27,14 +27,14 @@ def handler(event, context):
     
     try:
         # remove wr here, heavy dependency for not much benefit
-        files = wr.s3.list_objects(output_path)
+        files = wr.s3.list_objects(analysis_path)
         parquet_files = [f for f in files if f.endswith('.parquet')]
         current_count = len(parquet_files)
     except Exception:
         current_count = 0
 
     if current_count >= expected_count:
-        kick_off_next_processing_layer(body["DATASET_NAME"], body["PARTITION_COL"], output_path)
+        kick_off_next_processing_layer(body["DATASET_NAME"], body["PARTITION_COL"], analysis_path)
     else:
         requeue_poller(body)
         
@@ -43,7 +43,7 @@ def requeue_poller(body):
     queue_url = get_queue_url(sqs, os.environ["SQS_QUEUE_NAME"])
     sqs.send_message(QueueUrl=queue_url, MessageBody=json.dumps(body), DelaySeconds=POLL_DELAY_SECONDS)
 
-def kick_off_next_processing_layer(dataset_name, partition_col, output_path):
+def kick_off_next_processing_layer(dataset_name, partition_col, analysis_path):
     sqs = boto3.client("sqs")
     # TODO alter queue names later
     queue_url = get_queue_url(sqs, "SocrataSnapshotRollUpQueue")
@@ -51,7 +51,7 @@ def kick_off_next_processing_layer(dataset_name, partition_col, output_path):
     sqs.send_message(
         QueueUrl=queue_url,
         MessageBody=json.dumps({
-            "PROCESSED_DATA_PATH": output_path, 
+            "PROCESSED_DATA_PATH": analysis_path, 
             "DATASET_NAME": dataset_name,
             "PARTITION_COL": partition_col,
         }),
