@@ -27,8 +27,8 @@ Resources:
   SocrataSnapshotGenerator:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: snapshot_generation.handler
-      CodeUri: ./socrata/snapshot
+      Handler: /socrata/snapshot/snapshot_generation.handler
+      CodeUri: .
       Runtime: python3.12
       Role: "{{resolve:ssm:/ingestion/lambda-role}}"
       MemorySize: 1024
@@ -64,8 +64,8 @@ Resources:
   SocrataSnapshotRollUp: 
     Type: AWS::Serverless::Function
     Properties:
-      Handler: snapshot_rollup.handler
-      CodeUri: ./socrata/snapshot_aggregate
+      Handler: /socrata/snapshot_aggregate/snapshot_rollup.handler
+      CodeUri: .
       Runtime: python3.12
       Role: "{{resolve:ssm:/ingestion/lambda-role}}"
       MemorySize: 1024
@@ -101,8 +101,8 @@ Resources:
   ProcessorOrchestrator:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: fan_in.handler
-      CodeUri: ./orchestrator
+      Handler: orchestrator/fan_in.handler
+      CodeUri: .
       Runtime: python3.12
       Role: "{{resolve:ssm:/ingestion/lambda-role}}"
       MemorySize: 512

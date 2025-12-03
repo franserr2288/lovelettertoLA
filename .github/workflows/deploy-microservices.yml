@@ -59,11 +59,6 @@ jobs:
           echo "::add-mask::$ACCOUNT_ID"
           echo "account_id=$ACCOUNT_ID" >> $GITHUB_OUTPUT
 
-      - name: Prepare Lambda Layer for Shared Library
-        run: |
-          mkdir -p build/layer/python
-          cp -r src/lib/shared build/layer/python/
-
       - run: |
           TEMPLATE_DIR=$(dirname ${{ matrix.template }})
           cd $TEMPLATE_DIR

@@ -61,8 +61,8 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Runtime: python3.12
-      CodeUri: socrata/
-      Handler: ingest.handler 
+      CodeUri: .
+      Handler: socrata/ingest.handler 
       MemorySize: 3008
       Timeout: 900
       Role: "{{resolve:ssm:/ingestion/lambda-role}}"
@@ -84,8 +84,8 @@ Resources:
   DatasetIngestionOrchestrator:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: orchestrator.handler
-      CodeUri: ./orchestrator
+      Handler: orchestrator/orchestrator.handler
+      CodeUri: .
       Runtime: python3.12
       Role: "{{resolve:ssm:/ingestion/lambda-role}}"
       MemorySize: 128
