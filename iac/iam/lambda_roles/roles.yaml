@@ -61,6 +61,23 @@ Resources:
                 - s3:ListBucket
               Resource:
                 - !Sub 'arn:aws:s3:::{{resolve:ssm:/shared/data-bucket-name}}'
+        - PolicyName: DynamoDBAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:PutItem
+                  - dynamodb:GetItem
+                  - dynamodb:UpdateItem
+                  - dynamodb:DeleteItem
+                  - dynamodb:Query
+                  - dynamodb:Scan
+                  - dynamodb:BatchGetItem
+                  - dynamodb:BatchWriteItem
+                Resource:
+                  - !Sub 'arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/{{resolve:ssm:/shared/dynamodb-table-name}}'
+                  - !Sub 'arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/{{resolve:ssm:/shared/dynamodb-table-name}}/index/*'
        
   
   StoreIngestionLambdaRoleArn:

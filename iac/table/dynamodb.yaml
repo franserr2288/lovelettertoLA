@@ -35,3 +35,11 @@ Resources:
         PointInTimeRecoveryEnabled: true
       DeletionProtectionEnabled: true
     DeletionPolicy: Retain
+  
+  TableNameParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: /shared/dynamodb-table-name
+      Type: String
+      Value: !Ref MyServerlessTable
+      Description: DynamoDB table name for FS Open Data
