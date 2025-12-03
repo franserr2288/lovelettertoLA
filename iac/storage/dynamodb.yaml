@@ -1,0 +1,33 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Simple Serverless DynamoDB Table
+
+Resources:
+  MyServerlessTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: "FSOpenDataTable"
+      BillingMode: PAY_PER_REQUEST
+      
+      AttributeDefinitions:
+        - AttributeName: PK
+          AttributeType: S
+        - AttributeName: SK 
+          AttributeType: S
+        - AttributeName: EntityType
+          AttributeType: S
+      KeySchema:
+        - AttributeName: PK
+          KeyType: HASH
+        - AttributeName: SK
+          KeyType: RANGE
+          
+      SSESpecification:
+        SSEEnabled: true
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+
+      DeletionProtectionEnabled: true
+      
+    # keep table if stack is deleted
+    DeletionPolicy: Retain
