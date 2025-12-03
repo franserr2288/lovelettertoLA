@@ -4,11 +4,14 @@ import pandas as pd
 import traceback
 import datetime as dt
 from datetime import timezone
+from shared.messages.sqs import get_sqs_client_and_url
 from shared.utils.logging.logger import setup_logger
 from shared.utils.paths.data_paths import get_dated_snapshot_root_path, get_partition_snapshot_json_file_path, get_partition_snapshot_path
 from shared.utils.time.time_utils import get_today_str
 # TODO: geospatial analysis with the location data they give
 logger = setup_logger(__name__)
+BUCKET_NAME = os.environ["BUCKET_NAME"]
+
 
 def handler(event, context):
     logger.info(f"Event: {json.dumps(event)}")
@@ -49,10 +52,24 @@ def handler(event, context):
             df=metrics_df,
             path=get_partition_snapshot_json_file_path(bucket_name, dataset_name, today_str, partition_col, partition_val),
         )
+
+        job_type = body["JOB_TYPE"]
+        sqs_client, orchestrator_queue_url = get_client_and_url_for_orchestrator_queue()
+        sqs_client.send_message(
+            QueueUrl=orchestrator_queue_url,
+            MessageBody=json.dumps({
+                "JOB_TYPE": job_type
+            }),
+        )  
+
+
     except Exception as e:
         print(f"An error occurred in handler: {e}")
         print(traceback.format_exc())
-
+        
+def get_client_and_url_for_orchestrator_queue():
+    sqs_client, queue_url = get_sqs_client_and_url("SocrataProcessingOrchestrator")
+    return sqs_client,queue_url
 
 def run_analysis(dataset_name, df, partition_val, today_str):
     if dataset_name == "City311":    
