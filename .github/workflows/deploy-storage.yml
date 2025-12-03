@@ -51,3 +51,12 @@ jobs:
             --config-file samconfig.toml \
             --image-repository ${{ steps.account.outputs.account_id }}.dkr.ecr.${{ matrix.region }}.amazonaws.com/${{ secrets.ECR_REPO_NAME }} \
             --no-fail-on-empty-changeset
+          
+      - name: Build/Deploy Dynamodb Table
+        working-directory: iac/storage
+        run: |
+          sam build --template dynamodb.yaml
+          sam deploy \
+            --config-file samconfig.toml \
+            --image-repository ${{ steps.account.outputs.account_id }}.dkr.ecr.${{ matrix.region }}.amazonaws.com/${{ secrets.ECR_REPO_NAME }} \
+            --no-fail-on-empty-changeset
