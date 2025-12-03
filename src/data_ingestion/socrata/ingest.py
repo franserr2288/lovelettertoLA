@@ -2,6 +2,7 @@ import requests, os, json
 import awswrangler as wr 
 import pandas as pd
 from shared.messages.sqs import get_sqs_client_and_url
+from shared.models.tables import JobBatch
 from shared.secrets.ssm import get_secret_from_ssm
 from shared.utils.logging.logger import setup_logger
 from shared.utils.paths.data_paths import get_dated_snapshot_root_path, get_ingestion_path, get_partition_snapshot_path
@@ -60,22 +61,13 @@ def kick_off_processing_layer(data_frame, path, partition_col, dataset_name, dat
                 "DATASET_RESOURCE_ID": dataset_resource_id,
                 "PARTITION_COL": partition_col,
                 "PARTITION_VALUE": val,
-                "FORMAT": format
+                "FORMAT": format,
+                # "ANALYSIS_PATH": get_dated_snapshot_root_path(BUCKET_NAME, dataset_name, get_today_str()),
+                "JOB_TYPE":"snapshot_generation"
             }),
         )  
-    orchestrator_queue_url = get_client_and_url_for_orchestrator_queue(sqs_client)
-    sqs_client.send_message(
-        QueueUrl=orchestrator_queue_url,
-        MessageBody=json.dumps({
-            "TASK_TYPE": "POLLER",
-            "DATASET_NAME": dataset_name,
-            "PARTITION_COL": partition_col,
-            "ANALYSIS_PATH": get_dated_snapshot_root_path(BUCKET_NAME, dataset_name, get_today_str()),
-            "EXPECTED_COUNT": len(partition_values),
-            "START_TIME": get_time_stamp()
-        }),
-    )  
-
+    batch = JobBatch(job_type="snapshot_generation", expected_count=len(partition_values))
+    batch.save()
 
 def get_data(dataset_resource_id):
     url = construct_url_for_full_dataset_json(dataset_resource_id)
@@ -98,9 +90,7 @@ def construct_url_for_full_dataset_json(dataset_resource_id):
 def get_client_and_url_for_processing_queue(dataset_name):
     return get_sqs_client_and_url(f"SocrataSnapshotGeneratorQueue")
 
-def get_client_and_url_for_orchestrator_queue(sqs_client):
-    _, queue_url = get_sqs_client_and_url("SocrataProcessingOrchestrator")
-    return queue_url
+
 
 def get_app_token():
     socrata_app_token_param_name = os.environ["SOCRATA_TOKEN_PARAM_NAME"]
