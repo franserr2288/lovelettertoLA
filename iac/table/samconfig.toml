@@ -1,9 +1,9 @@
 version = 0.1
 
 [default.deploy.parameters]
-stack_name = "storage"
+stack_name = "storagetable"
 resolve_s3 = true
-s3_prefix = "storage"
+s3_prefix = "storagetable"
 region = "us-east-1"
 capabilities = "CAPABILITY_IAM"
 

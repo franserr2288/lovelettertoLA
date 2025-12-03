@@ -16,7 +16,6 @@ def handler(event, context):
         partition_col = body["PARTITION_COL"]
                 
         metrics_df = read_daily_snapshot_metrics(input_path)
-
         final_rollups = perform_cross_district_rollup(metrics_df, partition_col)
         
         write_final_rollups(final_rollups, dataset_name)
