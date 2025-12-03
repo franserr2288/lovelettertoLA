@@ -44,7 +44,7 @@ jobs:
           echo "account_id=$ACCOUNT_ID" >> $GITHUB_OUTPUT
 
       - name: Build/Deploy SAM s3 bucket
-        working-directory: iac/storage
+        working-directory: iac/bucket
         run: |
           sam build --template s3.yaml
           sam deploy \
@@ -53,7 +53,7 @@ jobs:
             --no-fail-on-empty-changeset
           
       - name: Build/Deploy Dynamodb Table
-        working-directory: iac/storage
+        working-directory: iac/table
         run: |
           sam build --template dynamodb.yaml
           sam deploy \
