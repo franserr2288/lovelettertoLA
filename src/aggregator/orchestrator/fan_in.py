@@ -15,17 +15,18 @@ def handler(event, context):
     logger.info(f"Event: {json.dumps(event)}")
 
     body = json.loads(event["Records"][0]["body"])
-    message_id = event["Records"][0]["messageId"]  # persists across retries
 
-    analysis_path = body["ANALYSIS_PATH"]
-
+    message_id = event["Records"][0]["messageId"] 
+    job_type = body["JOB_TYPE"]
+    dataset_name = body["DATASET_NAME"]
+    partition_col = body["PARTITION_COL"]
     # JobBatch(hash_key="snapshot_generation", range_key=JOB_BATCH_SK).update(
     #     actions=[
     #         Action(JobBatch.completed, Value(1), action='ADD')
     #     ]
     # )
     try:
-        JobBatch(hash_key="snapshot_generation", range_key=JOB_BATCH_SK).update(
+        JobBatch(hash_key=job_type, range_key=JOB_BATCH_SK).update(
             actions=[
                 Action(JobBatch.completed, Value(1), action='ADD'),
                 Action(JobBatch.processed_message_ids, Value({message_id}), action='ADD')
@@ -41,10 +42,10 @@ def handler(event, context):
     batch = JobBatch.get(hash_key="snapshot_generation", range_key=JOB_BATCH_SK)
 
     if batch.completed == batch.expected:
-        kick_off_next_processing_layer(body["DATASET_NAME"], body["PARTITION_COL"], analysis_path)
+        kick_off_next_processing_layer(dataset_name, partition_col)
 
 
-def kick_off_next_processing_layer(dataset_name, partition_col, analysis_path):
+def kick_off_next_processing_layer(dataset_name, partition_col):
     sqs = boto3.client("sqs")
     # TODO alter queue names later
     # TODO: create mapping based on inputs that maps to a specific queue name, so that i can reuse this as an orchestration 
@@ -55,7 +56,6 @@ def kick_off_next_processing_layer(dataset_name, partition_col, analysis_path):
     sqs.send_message(
         QueueUrl=queue_url,
         MessageBody=json.dumps({
-            "PROCESSED_DATA_PATH": analysis_path, 
             "DATASET_NAME": dataset_name,
             "PARTITION_COL": partition_col,
         }),

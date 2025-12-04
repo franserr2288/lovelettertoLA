@@ -3,18 +3,19 @@ import pandas as pd
 import json
 import os
 
-from shared.utils.paths.data_paths import get_dated_aggregate_snapshot_json_file_path, get_dated_aggregate_snapshot_path, get_partition_snapshot_json_file_path
+from shared.utils.paths.data_paths import get_dated_aggregate_snapshot_json_file_path, get_dated_aggregate_snapshot_path, get_partition_snapshot_json_file_path, get_dated_snapshot_root_path
 from shared.utils.time.time_utils import get_today_str
 
+BUCKET_NAME = os.environ["BUCKET_NAME"]
 
 def handler(event, context):    
     try:
         body = json.loads(event["Records"][0]["body"])
-        
-        input_path = body["PROCESSED_DATA_PATH"]
         dataset_name = body["DATASET_NAME"]
         partition_col = body["PARTITION_COL"]
-                
+        
+        input_path = get_dated_snapshot_root_path(BUCKET_NAME, dataset_name, get_today_str())
+        
         metrics_df = read_daily_snapshot_metrics(input_path)
         final_rollups = perform_cross_district_rollup(metrics_df, partition_col)
         

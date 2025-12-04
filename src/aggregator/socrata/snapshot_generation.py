@@ -54,12 +54,14 @@ def handler(event, context):
             path=get_partition_snapshot_json_file_path(bucket_name, dataset_name, today_str, partition_col, partition_val),
         )
 
-        job_type = body["JOB_TYPE"]
+        job_type = "snapshot_generation"
         sqs_client, orchestrator_queue_url = get_client_and_url_for_orchestrator_queue()
         sqs_client.send_message(
             QueueUrl=orchestrator_queue_url,
             MessageBody=json.dumps({
-                "JOB_TYPE": job_type
+                "JOB_TYPE": job_type,
+                "DATASET_NAME": body["DATASET_NAME"],
+                "PARTITION_COL": body["PARTITION_COL"]
             }),
         )  
 
