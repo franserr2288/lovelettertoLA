@@ -32,7 +32,7 @@ def handler(event, context):
                 JobBatch.processed_message_ids.add({message_id})
                 # AddAction(JobBatch.processed_message_ids, Value())
             ],
-            condition=(JobBatch.processed_message_ids.does_not_contain(message_id))
+            condition=(~(JobBatch.processed_message_ids.contains(message_id)))
         )
     except UpdateError as e:
         if e.cause_response_code == "ConditionalCheckFailedException":
