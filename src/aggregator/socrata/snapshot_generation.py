@@ -4,9 +4,10 @@ import pandas as pd
 import traceback
 import datetime as dt
 from datetime import timezone
+
 from shared.messages.sqs import get_sqs_client_and_url
 from shared.utils.logging.logger import setup_logger
-from shared.utils.paths.data_paths import get_dated_snapshot_root_path, get_partition_snapshot_json_file_path, get_partition_snapshot_path
+from shared.utils.paths.data_paths import get_partition_snapshot_json_file_path, get_partition_snapshot_path
 from shared.utils.time.time_utils import get_today_str
 # TODO: geospatial analysis with the location data they give
 logger = setup_logger(__name__)

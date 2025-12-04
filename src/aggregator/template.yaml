@@ -27,7 +27,7 @@ Resources:
   SocrataSnapshotGenerator:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: /socrata/snapshot_generation.handler
+      Handler: socrata/snapshot_generation.handler
       CodeUri: .
       Runtime: python3.12
       Role: "{{resolve:ssm:/ingestion/lambda-role}}"
@@ -64,7 +64,7 @@ Resources:
   SocrataSnapshotRollUp: 
     Type: AWS::Serverless::Function
     Properties:
-      Handler: /socrata/snapshot_rollup.handler
+      Handler: socrata/snapshot_rollup.handler
       CodeUri: .
       Runtime: python3.12
       Role: "{{resolve:ssm:/ingestion/lambda-role}}"

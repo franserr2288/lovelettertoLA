@@ -88,7 +88,8 @@ def construct_url_for_full_dataset_json(dataset_resource_id):
 
 #TODO: change queue names in template and here to better reflect their purpose
 def get_client_and_url_for_processing_queue(dataset_name):
-    return get_sqs_client_and_url(f"SocrataSnapshotGeneratorQueue")
+    region = os.environ["AWS_REGION"]
+    return get_sqs_client_and_url(queue_name="SocrataSnapshotGeneratorQueue", region=region)
 
 
 
