@@ -6,6 +6,7 @@ Globals:
   Function:
     Layers:
       - '{{resolve:ssm:/shared/lib_layer}}'
+    Timeout: 900
 
 Resources:
   # SNAPSHOT
