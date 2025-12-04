@@ -94,7 +94,8 @@ def get_client_and_url_for_processing_queue(dataset_name):
 
 def get_app_token():
     socrata_app_token_param_name = os.environ["SOCRATA_TOKEN_PARAM_NAME"]
-    return get_secret_from_ssm(socrata_app_token_param_name, True)
+    region = os.environ["AWS_REGION"]
+    return get_secret_from_ssm(socrata_app_token_param_name, True, region)
 
 
     

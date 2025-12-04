@@ -74,6 +74,7 @@ Resources:
           SOCRATA_TOKEN_PARAM_NAME: /ingestion/SOCRATA_APP_TOKEN
           BUCKET_NAME: "{{resolve:ssm:/shared/data-bucket-name}}"
           ENVIRONMENT: dev
+          AWS_REGION: !Sub ${AWS::Region}
       Events:
         SQSQueueEvent:
           Type: SQS
@@ -100,7 +101,7 @@ Resources:
           Type: ScheduleV2
           Properties:
             ScheduleExpression: cron(0 12 * * ? *) # daily at 12pm UTC
-            Input: !Sub '{"DATASET_NAME": "City311", "QUEUE_NAME":"${SocrataIngestionQueue.QueueName}", "DATASET_RESOURCE_ID":"h73f-gn57", "FORMAT": "PARQUET", "PARTITION_COL":"CD"}'
+            Input: !Sub '{"DATASET_NAME": "City311", "QUEUE_NAME":"${SocrataIngestionQueue.QueueName}", "DATASET_RESOURCE_ID":"h73f-gn57", "FORMAT": "PARQUET", "PARTITION_COL":"cd"}'
             RoleArn: "{{resolve:ssm:/ingestion/scheduler-role}}"
         
               
