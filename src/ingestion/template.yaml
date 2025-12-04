@@ -74,7 +74,7 @@ Resources:
           SOCRATA_TOKEN_PARAM_NAME: /ingestion/SOCRATA_APP_TOKEN
           BUCKET_NAME: "{{resolve:ssm:/shared/data-bucket-name}}"
           ENVIRONMENT: dev
-          AWS_REGION: !Sub ${AWS::Region}
+          REGION: !Sub ${AWS::Region}
       Events:
         SQSQueueEvent:
           Type: SQS
