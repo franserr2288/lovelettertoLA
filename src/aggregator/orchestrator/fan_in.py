@@ -40,7 +40,7 @@ def handler(event, context):
         else:
             raise
 
-    batch = JobBatch.get(hash_key="snapshot_generation", range_key=JOB_BATCH_SK)
+    batch = JobBatch.get(hash_key="JOBS#snapshot_generation", range_key=JOB_BATCH_SK)
 
     if batch.completed == batch.expected:
         kick_off_next_processing_layer(dataset_name, partition_col)
