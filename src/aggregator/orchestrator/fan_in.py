@@ -28,8 +28,9 @@ def handler(event, context):
     try:
         JobBatch(job_type).update(
             actions=[
-                AddAction(JobBatch.completed, Value(1)),
-                AddAction(JobBatch.processed_message_ids, Value({message_id}))
+                JobBatch.completed.add(1),
+                JobBatch.processed_message_ids.add({message_id})
+                # AddAction(JobBatch.processed_message_ids, Value())
             ],
             condition=(JobBatch.processed_message_ids.does_not_contain(message_id))
         )
