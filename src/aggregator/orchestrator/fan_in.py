@@ -26,7 +26,7 @@ def handler(event, context):
     #     ]
     # )
     try:
-        JobBatch(hash_key=job_type, range_key=JOB_BATCH_SK).update(
+        JobBatch(job_type).update(
             actions=[
                 Action(JobBatch.completed, Value(1), action='ADD'),
                 Action(JobBatch.processed_message_ids, Value({message_id}), action='ADD')
