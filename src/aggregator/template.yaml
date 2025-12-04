@@ -22,7 +22,7 @@ Resources:
       VisibilityTimeout: 900
       RedrivePolicy:
         deadLetterTargetArn: !GetAtt SocrataSnapshotGeneratorDLQ.Arn
-        maxReceiveCount: 1
+        maxReceiveCount: 2
 
   SocrataSnapshotGenerator:
     Type: AWS::Serverless::Function

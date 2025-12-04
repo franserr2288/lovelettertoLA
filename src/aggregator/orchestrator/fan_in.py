@@ -7,6 +7,7 @@ from shared.utils.logging.logger import setup_logger
 
 from pynamodb.expressions.update import Action
 from pynamodb.expressions.operand import Value
+from pynamodb.exceptions import UpdateError
 
 logger = setup_logger(__name__)
 
@@ -14,13 +15,28 @@ def handler(event, context):
     logger.info(f"Event: {json.dumps(event)}")
 
     body = json.loads(event["Records"][0]["body"])
+    message_id = event["Records"][0]["messageId"]  # persists across retries
+
     analysis_path = body["ANALYSIS_PATH"]
 
-    JobBatch(hash_key="snapshot_generation", range_key=JOB_BATCH_SK).update(
-        actions=[
-            Action(JobBatch.completed, Value(1), action='ADD')
-        ]
-    )
+    # JobBatch(hash_key="snapshot_generation", range_key=JOB_BATCH_SK).update(
+    #     actions=[
+    #         Action(JobBatch.completed, Value(1), action='ADD')
+    #     ]
+    # )
+    try:
+        JobBatch(hash_key="snapshot_generation", range_key=JOB_BATCH_SK).update(
+            actions=[
+                Action(JobBatch.completed, Value(1), action='ADD'),
+                Action(JobBatch.processed_message_ids, Value({message_id}), action='ADD')
+            ],
+            condition=(JobBatch.processed_message_ids.does_not_contain(message_id))
+        )
+    except UpdateError as e:
+        if e.cause_response_code == "ConditionalCheckFailedException":
+            logger.info(f"Message {message_id} already processed (idempotent retry)")
+        else:
+            raise
 
     batch = JobBatch.get(hash_key="snapshot_generation", range_key=JOB_BATCH_SK)
 

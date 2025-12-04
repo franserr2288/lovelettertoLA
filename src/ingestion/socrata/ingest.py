@@ -66,6 +66,8 @@ def kick_off_processing_layer(data_frame, path, partition_col, dataset_name, dat
                 "JOB_TYPE":"snapshot_generation"
             }),
         )  
+    print(partition_values)
+    print(len(partition_values))
     batch = JobBatch(job_type="snapshot_generation", expected=len(partition_values), completed=0)
     batch.save()
 

@@ -1,6 +1,6 @@
 import os
 from pynamodb.models import Model
-from pynamodb.attributes import UnicodeAttribute
+from pynamodb.attributes import UnicodeAttribute, UnicodeSetAttribute
 
 import uuid
 from pynamodb.models import Model
@@ -27,3 +27,4 @@ class JobBatch(OpenDataTable):
     
     completed = NumberAttribute(default=0, attr_name="completed")
     expected = NumberAttribute(attr_name="expected")
+    processed_message_ids = UnicodeSetAttribute(default=set)
