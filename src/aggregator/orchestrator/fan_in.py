@@ -5,7 +5,7 @@ from shared.models.tables import JobBatch, JOB_BATCH_SK
 from shared.utils.logging.logger import setup_logger
 
 
-from pynamodb.expressions.update import Action
+from pynamodb.expressions.update import AddAction
 from pynamodb.expressions.operand import Value
 from pynamodb.exceptions import UpdateError
 
@@ -28,8 +28,8 @@ def handler(event, context):
     try:
         JobBatch(job_type).update(
             actions=[
-                Action(JobBatch.completed, Value(1), action='ADD'),
-                Action(JobBatch.processed_message_ids, Value({message_id}), action='ADD')
+                AddAction(JobBatch.completed, Value(1), action='ADD'),
+                AddAction(JobBatch.processed_message_ids, Value({message_id}), action='ADD')
             ],
             condition=(JobBatch.processed_message_ids.does_not_contain(message_id))
         )
