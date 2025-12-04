@@ -5,8 +5,8 @@ from shared.messages.sqs import get_sqs_client_and_url
 from shared.models.tables import JobBatch
 from shared.secrets.ssm import get_secret_from_ssm
 from shared.utils.logging.logger import setup_logger
-from shared.utils.paths.data_paths import get_dated_snapshot_root_path, get_ingestion_path, get_partition_snapshot_path
-from shared.utils.time.time_utils import get_today_str, get_time_stamp
+from shared.utils.paths.data_paths import get_ingestion_path
+from shared.utils.time.time_utils import get_today_str
 
 logger = setup_logger(__name__)
 BUCKET_NAME = os.environ["BUCKET_NAME"]

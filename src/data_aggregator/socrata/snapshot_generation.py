@@ -68,8 +68,8 @@ def handler(event, context):
         print(traceback.format_exc())
         
 def get_client_and_url_for_orchestrator_queue():
-    sqs_client, queue_url = get_sqs_client_and_url("SocrataProcessingOrchestrator")
-    return sqs_client,queue_url
+    sqs_client, queue_url = get_sqs_client_and_url(queue_name="SocrataProcessingOrchestrator")
+    return sqs_client, queue_url
 
 def run_analysis(dataset_name, df, partition_val, today_str):
     if dataset_name == "City311":    
