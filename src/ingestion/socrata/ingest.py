@@ -26,24 +26,25 @@ def handler(event, context):
         partition_col = body["PARTITION_COL"]
         dataset_resource_id = body["DATASET_RESOURCE_ID"]
         data_frame = get_data(dataset_resource_id)
+        data_frame_filtered = data_frame[data_frame[partition_col].notna()]
 
         if format == "CSV":
             wr.s3.to_csv(
-                df=data_frame, 
+                df=data_frame_filtered, 
                 path=get_ingestion_path(format,BUCKET_NAME, dataset_name, get_today_str()), 
                 index=False
             )
         else:
             path = get_ingestion_path(format, BUCKET_NAME, dataset_name, get_today_str())
             wr.s3.to_parquet(
-                df=data_frame, 
+                df=data_frame_filtered, 
                 dataset=True, 
                 path=path,
                 mode="overwrite",
                 compression="snappy",
                 partition_cols=[partition_col]
             )
-            kick_off_processing_layer(data_frame, path, partition_col, dataset_name, dataset_resource_id, format) 
+            kick_off_processing_layer(data_frame_filtered, path, partition_col, dataset_name, dataset_resource_id, format) 
     
     except Exception as e:
         logger.exception(f"Exception: {e}")
