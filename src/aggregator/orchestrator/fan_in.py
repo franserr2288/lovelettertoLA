@@ -1,13 +1,8 @@
 import json
 import boto3
 from shared.messages.sqs import get_queue_url
-from shared.models.tables import JobBatch, JOB_BATCH_SK
+from shared.models.tables import JobBatch
 from shared.utils.logging.logger import setup_logger
-
-
-from pynamodb.expressions.update import AddAction
-from pynamodb.expressions.operand import Value
-from pynamodb.exceptions import UpdateError
 
 logger = setup_logger(__name__)
 
@@ -20,27 +15,9 @@ def handler(event, context):
     job_type = body["JOB_TYPE"]
     dataset_name = body["DATASET_NAME"]
     partition_col = body["PARTITION_COL"]
-    # JobBatch(hash_key="snapshot_generation", range_key=JOB_BATCH_SK).update(
-    #     actions=[
-    #         Action(JobBatch.completed, Value(1), action='ADD')
-    #     ]
-    # )
-    try:
-        JobBatch(job_type).update(
-            actions=[
-                JobBatch.completed.add(1),
-                JobBatch.processed_message_ids.add({message_id})
-                # AddAction(JobBatch.processed_message_ids, Value())
-            ],
-            condition=(~(JobBatch.processed_message_ids.contains(message_id)))
-        )
-    except UpdateError as e:
-        if e.cause_response_code == "ConditionalCheckFailedException":
-            logger.info(f"Message {message_id} already processed (idempotent retry)")
-        else:
-            raise
 
-    batch = JobBatch(job_type).get(hash_key="JOBS#snapshot_generation", range_key=JOB_BATCH_SK)
+    JobBatch.increment_completed(job_type, message_id)
+    batch = JobBatch.get_batch(job_type)
 
     if batch.completed == batch.expected:
         kick_off_next_processing_layer(dataset_name, partition_col)

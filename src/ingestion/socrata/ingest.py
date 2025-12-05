@@ -69,7 +69,7 @@ def kick_off_processing_layer(data_frame, path, partition_col, dataset_name, dat
         )  
     print(partition_values)
     print(len(partition_values))
-    batch = JobBatch(job_type="snapshot_generation", expected=len(partition_values), completed=0)
+    batch = JobBatch.create(job_type="snapshot_generation", expected=len(partition_values))
     batch.save()
 
 def get_data(dataset_resource_id):
