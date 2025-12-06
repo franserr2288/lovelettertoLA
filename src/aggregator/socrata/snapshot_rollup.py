@@ -88,7 +88,7 @@ def perform_cross_district_rollup(df: pd.DataFrame, partition_col: str) -> dict:
     top_5_report_card = top_districts[card_columns].to_dict(orient='records')
     bottom_5_report_card = bottom_districts[card_columns].to_dict(orient='records')
     
-    return {
+    payload = {
         "city_wide_stats": {
             "avg_days_to_close": city_avg_days_to_close,
             "total_new_requests": total_city_new_requests,
@@ -104,6 +104,7 @@ def perform_cross_district_rollup(df: pd.DataFrame, partition_col: str) -> dict:
         "top_5_report_card": top_5_report_card,
         "bottom_5_report_card": bottom_5_report_card
     }
+    return pd.DataFrame([payload])
 
 
 def write_final_rollups(df: pd.DataFrame, dataset_name: str):
