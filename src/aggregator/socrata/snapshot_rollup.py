@@ -7,14 +7,15 @@ from shared.utils.paths.data_paths import get_dated_aggregate_snapshot_json_file
 from shared.utils.time.time_utils import get_today_str
 
 BUCKET_NAME = os.environ["BUCKET_NAME"]
-
+#TODO: standardize the date flexibility i am about to do rn 
 def handler(event, context):    
     try:
         body = json.loads(event["Records"][0]["body"])
         dataset_name = body["DATASET_NAME"]
         partition_col = body["PARTITION_COL"]
+        date = body["DATE"] if "DATE" in body else get_today_str()
         
-        input_path = get_dated_snapshot_root_path(BUCKET_NAME, dataset_name, get_today_str())
+        input_path = get_dated_snapshot_root_path(BUCKET_NAME, dataset_name, date)
         
         metrics_df = read_daily_snapshot_metrics(input_path)
         final_rollups = perform_cross_district_rollup(metrics_df, partition_col)
@@ -25,10 +26,12 @@ def handler(event, context):
         raise
 
 
-def read_daily_snapshot_metrics(input_path):    
+def read_daily_snapshot_metrics(input_path):   
+    # push this into lib so that i dont need to know about the suffix  
     df = wr.s3.read_parquet(
         path=input_path, 
-        dataset=True
+        dataset=True,
+        path_suffix=['.parquet', '.snappy.parquet', '.gz.parquet']
     )
     return df
 

@@ -18,12 +18,11 @@ def handler(event, context):
     logger.info(f"Event: {json.dumps(event)}")
 
     try:
-        bucket_name = os.environ["BUCKET_NAME"]
-        
         body = json.loads(event["Records"][0]["body"])
-        format = body["FORMAT"]
         dataset_name: str = body["DATASET_NAME"]
         partition_col = body["PARTITION_COL"]
+        date = body["DATE"] if "date" in body else get_today_str()
+
                 
         if format != "PARQUET" or dataset_name != "City311":
             raise ValueError("Unsupported format or dataset.")
@@ -32,26 +31,25 @@ def handler(event, context):
         partition_val = body["PARTITION_VALUE"]
 
         df = wr.s3.read_parquet(path=ingestion_path)
-        today_str = get_today_str()
 
         snapshot_metrics = run_analysis(
             dataset_name, 
             df, 
             partition_val, 
-            today_str 
+            date 
         )
-        snapshot_metrics["analysis_date"] = today_str
+        snapshot_metrics["analysis_date"] = get_today_str() # can process other dates but correctly note processing date
 
         metrics_df = pd.DataFrame([snapshot_metrics])
         wr.s3.to_parquet(
             df=metrics_df,
-            path=get_partition_snapshot_path(bucket_name, dataset_name, today_str, partition_col, partition_val),
+            path=get_partition_snapshot_path(BUCKET_NAME, dataset_name, date, partition_col, partition_val),
             dataset=True,
             mode="overwrite",
         )
         wr.s3.to_json(
             df=metrics_df,
-            path=get_partition_snapshot_json_file_path(bucket_name, dataset_name, today_str, partition_col, partition_val),
+            path=get_partition_snapshot_json_file_path(BUCKET_NAME, dataset_name, date, partition_col, partition_val),
         )
 
         job_type = "snapshot_generation"
