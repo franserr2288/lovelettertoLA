@@ -1,7 +1,7 @@
 import os, json
 import awswrangler as wr 
 from ingestion.socrata.helper import get_socrata_data
-from shared.orchestration.layers import kick_off_processing_layer
+from shared.orchestration.layers import kick_off_analytics_layer
 from shared.utils.logging.logger import setup_logger
 from shared.utils.paths.data_paths import get_ingestion_path
 from shared.utils.time.time_utils import get_today_str
@@ -26,7 +26,7 @@ def handler(event, context):
 
 
         data_frame = get_socrata_data(source, dataset_resource_id, partition_col)
-        path = get_ingestion_path(format, BUCKET_NAME, dataset_name, date)
+        path = get_ingestion_path(BUCKET_NAME, dataset_name, date)
         wr.s3.to_parquet(
             df=data_frame, 
             dataset=True, 
@@ -35,7 +35,7 @@ def handler(event, context):
             compression="snappy",
             partition_cols=[partition_col]
         )
-        kick_off_processing_layer(data_frame, path, partition_col, dataset_name, dataset_resource_id) 
+        kick_off_analytics_layer(data_frame, path, partition_col, dataset_name, dataset_resource_id, "snapshot_generation") 
     
     except Exception as e:
         logger.exception(f"Exception: {e}")

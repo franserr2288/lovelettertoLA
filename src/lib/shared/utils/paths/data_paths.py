@@ -8,11 +8,8 @@ def get_partition_snapshot_path(bucket_name, dataset_name, date, partition_col, 
 def get_partition_snapshot_json_file_path(bucket_name, dataset_name, date, partition_col, partition_val):
     return get_dated_snapshot_root_path(bucket_name, dataset_name, date) + f"{partition_col}={partition_val}" + "/snapshot.json"
 
-def get_ingestion_path(format, bucket_name, dataset_name, date):
-    if format == "CSV":
-        return f"{get_base_path(bucket_name, dataset_name)}/raw/ingestion_date={date}/data.csv"
-    else:
-        return f"{get_base_path(bucket_name, dataset_name)}/raw/ingestion_date={date}"
+def get_ingestion_path(bucket_name, dataset_name, date):
+    return f"{get_base_path(bucket_name, dataset_name)}/raw/ingestion_date={date}"
 
 def get_dated_aggregate_snapshot_path(bucket_name, dataset_name, date):
     return f"{get_base_path(bucket_name, dataset_name)}/final_rollups/daily/analysis_date={date}/"
