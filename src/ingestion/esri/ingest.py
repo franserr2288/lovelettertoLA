@@ -14,13 +14,11 @@ def handler(event, context):
     try:
         # batch size 1
         body = json.loads(event["Records"][0]["body"])
-        format = body["FORMAT"]
-        if format not in ["PARQUET"]:
-            raise ValueError
 
         dataset_name: str = body["DATASET_NAME"]
         partition_col = body["PARTITION_COL"]
         dataset_resource_id = body["DATASET_RESOURCE_ID"]
+        
         date = body["DATE"] if "date" in body else get_today_str()
         needs_processing, next_layer = body.get("NEEDS_PROCESSING", False), body.get("NEXT_LAYER", None)
         layer_ids = body.get("LAYERS", [])
@@ -35,6 +33,7 @@ def handler(event, context):
             compression="snappy",
             partition_cols=[partition_col]
         )
+
         if needs_processing:
             # plug the next layer logic in later
             print(next_layer)
