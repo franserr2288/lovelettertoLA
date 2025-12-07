@@ -111,16 +111,16 @@ Resources:
       Role: "{{resolve:ssm:/ingestion/lambda-role}}"
       MemorySize: 128
       Events:
-        TimerParquet:
+        SocrataTimerParquet:
           Type: ScheduleV2
           Properties:
             ScheduleExpression: cron(0 12 * * ? *) # daily at 12pm UTC
             Input: !Sub '{"DATASET_NAME": "City311", "QUEUE_NAME":"${SocrataIngestionQueue.QueueName}", "DATASET_RESOURCE_ID":"h73f-gn57", "FORMAT": "PARQUET", "PARTITION_COL":"cd", "SOURCE":"SOCRATA"}'
             RoleArn: "{{resolve:ssm:/ingestion/scheduler-role}}"
-        TimerParquet:
+        EsriParquet:
           Type: ScheduleV2
           Properties:
-            ScheduleExpression: cron(0 12 * * ? *) # daily at 12pm UTC
+            ScheduleExpression: cron(0 12 1 * ? *) # monthly on the 1st at 12pm UTC
             Input: !Sub '{"DATASET_NAME": "MedianIncomeAndAMI", "QUEUE_NAME":"${EsriIngestionQueue.QueueName}", "DATASET_RESOURCE_ID":"RmCCgQtiZLDCtblq/arcgis/rest/services/Median_Income_and_AMI__census_tract_", "PARTITION_COL":"sup_dist", "SOURCE":"ESRI"}'
             RoleArn: "{{resolve:ssm:/ingestion/scheduler-role}}"
         
