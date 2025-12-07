@@ -31,33 +31,7 @@ Resources:
       Value: !Ref SocrataIngestionQueue
       Description: URL for the processing queue
 
-  # Ingestion:
-  #   Type: AWS::Serverless::Function
-  #   Properties:
-  #     PackageType: Image
-  #     MemorySize: 3008
-  #     Timeout: 900
-  #     Role: "{{resolve:ssm:/ingestion/lambda-role}}"
-  #     Environment:
-  #       Variables:
-  #         BASE_URL: "https://data.lacity.org"
-  #         SOCRATA_TOKEN_PARAM_NAME: /ingestion/SOCRATA_APP_TOKEN
-  #         BUCKET_NAME: "{{resolve:ssm:/shared/data-bucket-name}}"
-  #         # param it later
-  #         ENVIRONMENT: dev
-
-  #     Events:
-  #       SQSQueueEvent:
-  #         Type: SQS
-  #         Properties:
-  #           Queue: !GetAtt SocrataIngestionQueue.Arn
-  #           BatchSize: 1
-  #   Metadata:
-  #     DockerTag: python3.12-v2
-  #     DockerContext: socrata/
-  #     Dockerfile: Dockerfile
-
-  Ingestion:
+  SocrataIngestion:
     Type: AWS::Serverless::Function
     Properties:
       Runtime: python3.12
@@ -80,6 +54,52 @@ Resources:
           Type: SQS
           Properties:
             Queue: !GetAtt SocrataIngestionQueue.Arn
+            BatchSize: 1
+  
+  EsriIngestionQueueDLQ:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: EsriIngestionQueue-DLQ
+  
+  EsriIngestionQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: EsriIngestionQueue
+
+      VisibilityTimeout: 900
+      RedrivePolicy:
+        deadLetterTargetArn: !GetAtt EsriIngestionQueueDLQ.Arn
+        maxReceiveCount: 1
+  
+  EsriIngestionQueueUrlParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: /ingestion/esri/queue_url
+      Type: String
+      Value: !Ref EsriIngestionQueue
+      Description: URL for the processing queue
+
+  EsriIngestion:
+    Type: AWS::Serverless::Function
+    Properties:
+      Runtime: python3.12
+      CodeUri: .
+      Handler: esri/ingest.handler 
+      MemorySize: 3008
+      Timeout: 900
+      Role: "{{resolve:ssm:/ingestion/lambda-role}}"
+      Layers:
+        - !Sub arn:aws:lambda:${AWS::Region}:336392948345:layer:AWSSDKPandas-Python312:13
+      Environment:
+        Variables:
+          BUCKET_NAME: "{{resolve:ssm:/shared/data-bucket-name}}"
+          ENVIRONMENT: dev
+          REGION: !Sub ${AWS::Region}
+      Events:
+        SQSQueueEvent:
+          Type: SQS
+          Properties:
+            Queue: !GetAtt EsriIngestionQueue.Arn
             BatchSize: 1
 
   DatasetIngestionOrchestrator:
