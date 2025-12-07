@@ -1,3 +1,4 @@
+import json
 import os
 from shared.messages.sqs import get_sqs_client_and_url
 from shared.models.tables import JobBatch
