@@ -35,7 +35,7 @@ def handler(event, context):
             compression="snappy",
             partition_cols=[partition_col]
         )
-        kick_off_processing_layer(data_frame, path, partition_col, dataset_name, dataset_resource_id, format) 
+        kick_off_processing_layer(data_frame, path, partition_col, dataset_name, dataset_resource_id) 
     
     except Exception as e:
         logger.exception(f"Exception: {e}")

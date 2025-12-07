@@ -10,25 +10,25 @@ Globals:
 
 Resources:
   # SNAPSHOT
-  SocrataSnapshotGeneratorDLQ:
+  SnapshotGeneratorDLQ:
       Type: AWS::SQS::Queue
       Properties:
-        QueueName: SocrataSnapshotGenerator-DLQ
+        QueueName: SnapshotGenerator-DLQ
   
-  SocrataSnapshotGeneratorQueue:
+  SnapshotGeneratorQueue:
     Type: AWS::SQS::Queue
     Properties:
-      QueueName: SocrataSnapshotGeneratorQueue
+      QueueName: SnapshotGeneratorQueue
 
       VisibilityTimeout: 900
       RedrivePolicy:
-        deadLetterTargetArn: !GetAtt SocrataSnapshotGeneratorDLQ.Arn
+        deadLetterTargetArn: !GetAtt SnapshotGeneratorDLQ.Arn
         maxReceiveCount: 2
 
-  SocrataSnapshotGenerator:
+  SnapshotGenerator:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: socrata/snapshot_generation.handler
+      Handler: snapshots/snapshot_generation.handler
       CodeUri: .
       Runtime: python3.12
       Role: "{{resolve:ssm:/ingestion/lambda-role}}"
@@ -43,29 +43,29 @@ Resources:
         SQSQueueEvent:
           Type: SQS
           Properties:
-            Queue: !GetAtt SocrataSnapshotGeneratorQueue.Arn
+            Queue: !GetAtt SnapshotGeneratorQueue.Arn
             BatchSize: 1
 
   # SNAPSHOT ROLLUP
-  SocrataSnapshotRollUpQueueDLQ:
+  SnapshotRollUpQueueDLQ:
       Type: AWS::SQS::Queue
       Properties:
-        QueueName: SocrataSnapshotRollUpQueue-DLQ
+        QueueName: SnapshotRollUpQueue-DLQ
   
-  SocrataSnapshotRollUpQueue:
+  SnapshotRollUpQueue:
     Type: AWS::SQS::Queue
     Properties:
-      QueueName: SocrataSnapshotRollUpQueue
+      QueueName: SnapshotRollUpQueue
 
       VisibilityTimeout: 900
       RedrivePolicy:
-        deadLetterTargetArn: !GetAtt SocrataSnapshotRollUpQueueDLQ.Arn
+        deadLetterTargetArn: !GetAtt SnapshotRollUpQueueDLQ.Arn
         maxReceiveCount: 1
 
-  SocrataSnapshotRollUp: 
+  SnapshotRollUp: 
     Type: AWS::Serverless::Function
     Properties:
-      Handler: socrata/snapshot_rollup.handler
+      Handler: snapshots/snapshot_rollup.handler
       CodeUri: .
       Runtime: python3.12
       Role: "{{resolve:ssm:/ingestion/lambda-role}}"
@@ -80,23 +80,23 @@ Resources:
         SQSQueueEvent:
           Type: SQS
           Properties:
-            Queue: !GetAtt SocrataSnapshotRollUpQueue.Arn
+            Queue: !GetAtt SnapshotRollUpQueue.Arn
             BatchSize: 1
 
   # ORCHESTRATOR
-  SocrataProcessingOrchestratorDLQ:
+  ProcessingOrchestratorDLQ:
       Type: AWS::SQS::Queue
       Properties:
-        QueueName: SocrataProcessingOrchestrator-DLQ
+        QueueName: ProcessingOrchestrator-DLQ
   
-  SocrataProcessingOrchestrator:
+  ProcessingOrchestrator:
     Type: AWS::SQS::Queue
     Properties:
-      QueueName: SocrataProcessingOrchestrator
+      QueueName: ProcessingOrchestrator
 
       VisibilityTimeout: 900
       RedrivePolicy:
-        deadLetterTargetArn: !GetAtt SocrataProcessingOrchestratorDLQ.Arn
+        deadLetterTargetArn: !GetAtt ProcessingOrchestratorDLQ.Arn
         maxReceiveCount: 1
 
   ProcessorOrchestrator:
@@ -112,7 +112,7 @@ Resources:
       Environment:
         Variables:
           BUCKET_NAME: "{{resolve:ssm:/shared/data-bucket-name}}"
-          SQS_QUEUE_NAME: !GetAtt SocrataProcessingOrchestrator.QueueName
+          SQS_QUEUE_NAME: !GetAtt ProcessingOrchestrator.QueueName
           # param it later
           ENVIRONMENT: dev
 
@@ -120,7 +120,7 @@ Resources:
         SQSQueueEvent:
           Type: SQS
           Properties:
-            Queue: !GetAtt SocrataProcessingOrchestrator.Arn
+            Queue: !GetAtt ProcessingOrchestrator.Arn
             BatchSize: 1
 
   

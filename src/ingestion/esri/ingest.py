@@ -18,7 +18,7 @@ def handler(event, context):
         dataset_name: str = body["DATASET_NAME"]
         partition_col = body["PARTITION_COL"]
         dataset_resource_id = body["DATASET_RESOURCE_ID"]
-        
+
         date = body["DATE"] if "date" in body else get_today_str()
         needs_processing, next_layer = body.get("NEEDS_PROCESSING", False), body.get("NEXT_LAYER", None)
         layer_ids = body.get("LAYERS", [])
@@ -35,9 +35,8 @@ def handler(event, context):
         )
 
         if needs_processing:
-            # plug the next layer logic in later
             print(next_layer)
-            kick_off_processing_layer(data_frame, path, partition_col, dataset_name, dataset_resource_id, format) 
+            kick_off_processing_layer(data_frame, path, partition_col, dataset_name, dataset_resource_id) 
     
     except Exception as e:
         logger.exception(f"Exception: {e}")

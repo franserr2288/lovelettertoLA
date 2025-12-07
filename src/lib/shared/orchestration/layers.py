@@ -4,7 +4,7 @@ from shared.messages.sqs import get_sqs_client_and_url
 from shared.models.tables import JobBatch
 
 
-def kick_off_processing_layer(data_frame, path, partition_col, dataset_name, dataset_resource_id, format):
+def kick_off_processing_layer(data_frame, path, partition_col, dataset_name, dataset_resource_id):
     partition_values = data_frame[partition_col].unique().tolist()
     sqs_client, queue_url = get_client_and_url_for_processing_queue(dataset_name)
     for val in partition_values:
@@ -24,4 +24,4 @@ def kick_off_processing_layer(data_frame, path, partition_col, dataset_name, dat
 #TODO: change queue names in template and here to better reflect their purpose
 def get_client_and_url_for_processing_queue(dataset_name):
     region = os.environ["REGION"]
-    return get_sqs_client_and_url(queue_name="SocrataSnapshotGeneratorQueue", region=region)
+    return get_sqs_client_and_url(queue_name="SnapshotGeneratorQueue", region=region)
