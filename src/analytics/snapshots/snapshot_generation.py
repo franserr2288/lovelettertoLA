@@ -24,8 +24,8 @@ def handler(event, context):
         date = body["DATE"] if "date" in body else get_today_str()
 
                 
-        if format != "PARQUET" or dataset_name != "City311":
-            raise ValueError("Unsupported format or dataset.")
+        if dataset_name != "City311":
+            raise ValueError("Unsupported dataset.")
         
         ingestion_path = body["INGESTION_PATH"]
         partition_val = body["PARTITION_VALUE"]
