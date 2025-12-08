@@ -18,3 +18,4 @@ credentials.json
 .python-version
 secrets.sh
 local-dev.py
+bootstrap.md
